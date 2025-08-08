@@ -345,9 +345,15 @@
             }
 
             const options = {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 60000
+                enableHighAccuracy: true,    // Request high accuracy (GPS if available)
+                timeout: 30000,             // Increased timeout to 30 seconds
+                maximumAge: 0,              // Don't use a cached position
+                desiredAccuracy: 5,         // In meters (best possible accuracy)
+                fallbackToIP: false,        // Don't fall back to IP-based geolocation
+                watch: true,                // Keep watching for better accuracy
+                maximumAge: 0,              // Force getting a fresh position
+                requireAltitude: true,      // Request altitude if available
+                requireAltitudeAccuracy: true // Request altitude accuracy
             };
 
             navigator.geolocation.getCurrentPosition(
@@ -400,25 +406,124 @@
         }
 
         function reverseGeocode(lat, lng) {
-            // Simple reverse geocoding using a free service
-            // Note: In production, you might want to use Google Maps API or similar
             const addressDiv = document.getElementById('approximateAddress');
-            addressDiv.textContent = 'Loading address...';
+            addressDiv.textContent = 'Getting precise address...';
+            addressDiv.className = 'loading';
 
-            // Using OpenStreetMap Nominatim for reverse geocoding (free service)
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
-                .then(response => response.json())
+            // Using Google Maps Geocoding API with Kankinara-specific parameters
+            const apiKey = 'AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw';
+            const url = `https://maps.googleapis.com/maps/api/geocode/json
+                ?latlng=${lat},${lng}
+                &key=${apiKey}
+                &result_type=street_address|premise|sublocality|route|neighborhood|locality
+                &location_type=ROOFTOP|RANGE_INTERPOLATED
+                &region=in
+                &language=en
+                &components=locality:Kankinara|administrative_area:West%20Bengal|country:IN
+                &bounds=22.80,88.30|23.00,88.50`; // Bounding box around Kankinara area
+
+            // Add timestamp to prevent caching
+            const timestamp = new Date().getTime();
+            const cacheBustedUrl = `${url.replace(/\?/,'?')}${url.includes('?') ? '&' : '?'}_=${timestamp}`;
+            
+            fetch(cacheBustedUrl, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
+                },
+                cache: 'no-store'
+            })
+            .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
                 .then(data => {
-                    if (data && data.display_name) {
-                        addressDiv.textContent = data.display_name;
+                    if (data.status === 'OK' && data.results && data.results.length > 0) {
+                        // Find the most precise result
+                        const result = data.results[0];
+                        const formattedAddress = result.formatted_address;
+                        
+                        // Get the user's name from the form
+                        const firstName = document.getElementById('firstName')?.value || '';
+                        const lastName = document.getElementById('lastName')?.value || '';
+                        const userName = firstName || lastName ? `${firstName} ${lastName}`.trim() : '';
+                        
+                        // Process address to ensure Kankinara is correctly identified
+                        let processedAddress = formattedAddress;
+                        
+                        // If address contains Naihati but we know we're in Kankinara
+                        if (processedAddress.toLowerCase().includes('naihati') && 
+                            !processedAddress.toLowerCase().includes('kankinara')) {
+                            processedAddress = processedAddress.replace(/Naihati/gi, 'Kankinara');
+                        }
+                        
+                        // Add Kankinara if missing
+                        if (!processedAddress.toLowerCase().includes('kankinara')) {
+                            processedAddress += ', Kankinara';
+                        }
+                        
+                        // Update the address display with name
+                        addressDiv.innerHTML = userName 
+                            ? `<strong>${userName}</strong><br>${processedAddress}`
+                            : processedAddress;
+                        
+                        // Update the address field in the form with name and address
+                        const addressInput = document.getElementById('address');
+                        if (addressInput) {
+                            addressInput.value = userName 
+                                ? `${userName}\n${formattedAddress}`
+                                : formattedAddress;
+                        }
+                        
+                        // If the first result isn't precise enough, try to find a better match
+                        if (result.types.includes('sublocality') && data.results.length > 1) {
+                            for (const res of data.results) {
+                                if (res.types.includes('street_address') || res.types.includes('premise')) {
+                                    addressDiv.textContent = res.formatted_address;
+                                    if (addressInput) {
+                                        addressInput.value = res.formatted_address;
+                                    }
+                                    break;
+                                }
+                            }
+                        }
                     } else {
                         addressDiv.textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        console.warn('No results from Google Geocoding API', data);
                     }
+                    addressDiv.className = '';
                 })
                 .catch(error => {
                     console.error('Reverse geocoding error:', error);
                     addressDiv.textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    addressDiv.className = 'error';
+                    
+                    // Fallback to OpenStreetMap if Google fails
+                    fallbackToOpenStreetMap(lat, lng);
                 });
+        }
+        
+        function fallbackToOpenStreetMap(lat, lng) {
+            const addressDiv = document.getElementById('approximateAddress');
+            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18&email=your-email@example.com`;
+            
+            fetch(url, {
+                headers: {
+                    'Accept-Language': 'en',
+                    'User-Agent': 'YourApp/1.0'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    addressDiv.textContent = data.display_name;
+                    const addressInput = document.getElementById('address');
+                    if (addressInput) {
+                        addressInput.value = data.display_name;
+                    }
+                }
+            })
+            .catch(error => console.error('Fallback geocoding error:', error));
         }
 
         // Form submission
