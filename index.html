@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Details & Location Form</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            font-weight: 300;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .location-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .location-title {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .location-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .location-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .location-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .location-display {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .location-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .location-item {
+            background: rgba(102, 126, 234, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .location-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .status-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            font-weight: 500;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.1);
+            color: #F44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .loading {
+            background: rgba(255, 193, 7, 0.1);
+            color: #FF9800;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .location-info {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 25px;
+            }
+        }
+
+        .map-container {
+            width: 100%;
+            height: 200px;
+            border-radius: 10px;
+            margin-top: 15px;
+            background: #f0f0f0;
+            display: none;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="form-container">
+        <h1 class="form-title">User Registration & Location</h1>
+
+        <form id="userForm">
+            <!-- Personal Information -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name *</label>
+                    <input type="text" id="firstName" name="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name *</label>
+                    <input type="text" id="lastName" name="lastName" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" name="age" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="">Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer-not-to-say">Prefer not to say</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <textarea id="address" name="address" placeholder="Enter your full address..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="specialRequests">Special Requests / Additional Information</label>
+                <textarea id="specialRequests" name="specialRequests"
+                    placeholder="Please describe any special requirements, preferences, or additional information you'd like us to know..."></textarea>
+            </div>
+
+            <!-- Location Tracking Section -->
+            <div class="location-section">
+                <h3 class="location-title">📍 GPS Location Tracking</h3>
+                <p style="margin-bottom: 15px; color: #666;">We can automatically detect your current location to
+                    provide better service.</p>
+
+                <button type="button" id="getLocationBtn" class="location-btn">
+                    Get My Current Location
+                </button>
+
+                <div id="locationStatus"></div>
+
+                <div id="locationDisplay" class="location-display" style="display: none;">
+                    <h4>Your Current Location:</h4>
+                    <div class="location-info">
+                        <div class="location-item">
+                            <strong>Latitude:</strong>
+                            <span id="latitude">-</span>
+                        </div>
+                        <div class="location-item">
+                            <strong>Longitude:</strong>
+                            <span id="longitude">-</span>
+                        </div>
+                        <div class="location-item">
+                            <strong>Accuracy:</strong>
+                            <span id="accuracy">-</span>
+                        </div>
+                        <div class="location-item">
+                            <strong>Timestamp:</strong>
+                            <span id="timestamp">-</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px;">
+                        <strong>Approximate Address:</strong>
+                        <div id="approximateAddress">Loading address...</div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Form</button>
+        </form>
+    </div>
+
+    <script>
+        let currentLocation = null;
+
+        // Get location button functionality
+        document.getElementById('getLocationBtn').addEventListener('click', function () {
+            const btn = this;
+            const statusDiv = document.getElementById('locationStatus');
+
+            btn.disabled = true;
+            btn.textContent = 'Getting Location...';
+
+            statusDiv.innerHTML = '<div class="status-message loading">🔄 Requesting location access...</div>';
+
+            if (!navigator.geolocation) {
+                statusDiv.innerHTML = '<div class="status-message error">❌ Geolocation is not supported by this browser.</div>';
+                btn.disabled = false;
+                btn.textContent = 'Get My Current Location';
+                return;
+            }
+
+            const options = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            };
+
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    currentLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy,
+                        timestamp: new Date(position.timestamp)
+                    };
+
+                    displayLocation(currentLocation);
+                    reverseGeocode(currentLocation.latitude, currentLocation.longitude);
+
+                    statusDiv.innerHTML = '<div class="status-message success">✅ Location detected successfully!</div>';
+                    btn.textContent = 'Location Detected ✓';
+                    btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                },
+                function (error) {
+                    let errorMessage = '';
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = "Location access denied by user.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = "Location request timed out.";
+                            break;
+                        default:
+                            errorMessage = "An unknown error occurred.";
+                            break;
+                    }
+
+                    statusDiv.innerHTML = `<div class="status-message error">❌ Error: ${errorMessage}</div>`;
+                    btn.disabled = false;
+                    btn.textContent = 'Try Again';
+                }
+            );
+        });
+
+        function displayLocation(location) {
+            document.getElementById('latitude').textContent = location.latitude.toFixed(6);
+            document.getElementById('longitude').textContent = location.longitude.toFixed(6);
+            document.getElementById('accuracy').textContent = `±${Math.round(location.accuracy)} meters`;
+            document.getElementById('timestamp').textContent = location.timestamp.toLocaleString();
+
+            document.getElementById('locationDisplay').style.display = 'block';
+        }
+
+        function reverseGeocode(lat, lng) {
+            // Simple reverse geocoding using a free service
+            // Note: In production, you might want to use Google Maps API or similar
+            const addressDiv = document.getElementById('approximateAddress');
+            addressDiv.textContent = 'Loading address...';
+
+            // Using OpenStreetMap Nominatim for reverse geocoding (free service)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.display_name) {
+                        addressDiv.textContent = data.display_name;
+                    } else {
+                        addressDiv.textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Reverse geocoding error:', error);
+                    addressDiv.textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                });
+        }
+
+        // Form submission
+        document.getElementById('userForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+            const data = {};
+
+            // Collect form data
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+
+            // Add location data if available
+            if (currentLocation) {
+                data.location = currentLocation;
+                data.locationCaptured = true;
+            } else {
+                data.locationCaptured = false;
+            }
+
+            // Display the collected data (in a real app, this would be sent to a server)
+            console.log('Form Data:', data);
+
+            // Show success message
+            const statusDiv = document.getElementById('locationStatus');
+            statusDiv.innerHTML = '<div class="status-message success">🎉 Form submitted successfully! Check the console for submitted data.</div>';
+
+            // In a real application, you would send this data to your server:
+            // fetch('/api/submit-form', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(data)
+            // });
+        });
+
+        // Auto-detect location on page load (optional)
+        window.addEventListener('load', function () {
+            // Uncomment the next line if you want to auto-request location on page load
+            // document.getElementById('getLocationBtn').click();
+        });
+    </script>
+</body>
+
+</html>
