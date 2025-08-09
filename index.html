@@ -5,224 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Details & Location Form</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .form-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .form-title {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 2.2em;
-            font-weight: 300;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #555;
-            font-weight: 500;
-            font-size: 0.95em;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-            transform: translateY(-2px);
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 120px;
-        }
-
-        .location-section {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
-            border-radius: 15px;
-            padding: 25px;
-            margin: 30px 0;
-            border: 2px solid rgba(102, 126, 234, 0.2);
-        }
-
-        .location-title {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-            font-weight: 600;
-        }
-
-        .location-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-
-        .location-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .location-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .location-display {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .location-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .location-item {
-            background: rgba(102, 126, 234, 0.05);
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .location-item strong {
-            color: #667eea;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 30px;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
-        }
-
-        .status-message {
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            font-weight: 500;
-        }
-
-        .success {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4CAF50;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-        }
-
-        .error {
-            background: rgba(244, 67, 54, 0.1);
-            color: #F44336;
-            border: 1px solid rgba(244, 67, 54, 0.3);
-        }
-
-        .loading {
-            background: rgba(255, 193, 7, 0.1);
-            color: #FF9800;
-            border: 1px solid rgba(255, 193, 7, 0.3);
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .location-info {
-                grid-template-columns: 1fr;
-            }
-
-            .form-container {
-                padding: 25px;
-            }
-        }
-
-        .map-container {
-            width: 100%;
-            height: 200px;
-            border-radius: 10px;
-            margin-top: 15px;
-            background: #f0f0f0;
-            display: none;
-            border: 2px solid rgba(102, 126, 234, 0.2);
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -284,17 +67,16 @@
             <!-- Location Tracking Section -->
             <div class="location-section">
                 <h3 class="location-title">📍 GPS Location Tracking</h3>
-                <p style="margin-bottom: 15px; color: #666;">We can automatically detect your current location to
-                    provide better service.</p>
+                <p style="margin-bottom: 15px; color: #666;">We can automatically detect your exact current location and city to provide better service.</p>
 
                 <button type="button" id="getLocationBtn" class="location-btn">
-                    Get My Current Location
+                    Get My Exact Location
                 </button>
 
                 <div id="locationStatus"></div>
 
                 <div id="locationDisplay" class="location-display" style="display: none;">
-                    <h4>Your Current Location:</h4>
+                    <h4>Your Exact Location Details:</h4>
                     <div class="location-info">
                         <div class="location-item">
                             <strong>Latitude:</strong>
@@ -313,9 +95,15 @@
                             <span id="timestamp">-</span>
                         </div>
                     </div>
+                    
+                    <div class="city-info">
+                        <h4>🏙️ Exact City Information:</h4>
+                        <div id="cityDetails">Loading city details...</div>
+                    </div>
+                    
                     <div style="margin-top: 15px;">
-                        <strong>Approximate Address:</strong>
-                        <div id="approximateAddress">Loading address...</div>
+                        <strong>Complete Address:</strong>
+                        <div id="approximateAddress">Loading exact address...</div>
                     </div>
                 </div>
             </div>
@@ -326,6 +114,7 @@
 
     <script>
         let currentLocation = null;
+        let exactLocationData = null;
 
         // Get location button functionality
         document.getElementById('getLocationBtn').addEventListener('click', function () {
@@ -333,27 +122,21 @@
             const statusDiv = document.getElementById('locationStatus');
 
             btn.disabled = true;
-            btn.textContent = 'Getting Location...';
+            btn.textContent = 'Getting Exact Location...';
 
-            statusDiv.innerHTML = '<div class="status-message loading">🔄 Requesting location access...</div>';
+            statusDiv.innerHTML = '<div class="status-message loading">🔄 Requesting high-precision location access...</div>';
 
             if (!navigator.geolocation) {
                 statusDiv.innerHTML = '<div class="status-message error">❌ Geolocation is not supported by this browser.</div>';
                 btn.disabled = false;
-                btn.textContent = 'Get My Current Location';
+                btn.textContent = 'Get My Exact Location';
                 return;
             }
 
             const options = {
-                enableHighAccuracy: true,    // Request high accuracy (GPS if available)
-                timeout: 30000,             // Increased timeout to 30 seconds
-                maximumAge: 0,              // Don't use a cached position
-                desiredAccuracy: 5,         // In meters (best possible accuracy)
-                fallbackToIP: false,        // Don't fall back to IP-based geolocation
-                watch: true,                // Keep watching for better accuracy
-                maximumAge: 0,              // Force getting a fresh position
-                requireAltitude: true,      // Request altitude if available
-                requireAltitudeAccuracy: true // Request altitude accuracy
+                enableHighAccuracy: true,
+                timeout: 45000,
+                maximumAge: 0
             };
 
             navigator.geolocation.getCurrentPosition(
@@ -366,10 +149,10 @@
                     };
 
                     displayLocation(currentLocation);
-                    reverseGeocode(currentLocation.latitude, currentLocation.longitude);
+                    getExactLocationDetails(currentLocation.latitude, currentLocation.longitude);
 
-                    statusDiv.innerHTML = '<div class="status-message success">✅ Location detected successfully!</div>';
-                    btn.textContent = 'Location Detected ✓';
+                    statusDiv.innerHTML = '<div class="status-message success">✅ Exact location detected successfully!</div>';
+                    btn.textContent = 'Exact Location Detected ✓';
                     btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
                 },
                 function (error) {
@@ -397,133 +180,162 @@
         });
 
         function displayLocation(location) {
-            document.getElementById('latitude').textContent = location.latitude.toFixed(6);
-            document.getElementById('longitude').textContent = location.longitude.toFixed(6);
+            document.getElementById('latitude').textContent = location.latitude.toFixed(8);
+            document.getElementById('longitude').textContent = location.longitude.toFixed(8);
             document.getElementById('accuracy').textContent = `±${Math.round(location.accuracy)} meters`;
             document.getElementById('timestamp').textContent = location.timestamp.toLocaleString();
 
             document.getElementById('locationDisplay').style.display = 'block';
         }
 
-        function reverseGeocode(lat, lng) {
+        function getExactLocationDetails(lat, lng) {
             const addressDiv = document.getElementById('approximateAddress');
-            addressDiv.textContent = 'Getting precise address...';
-            addressDiv.className = 'loading';
-
-            // Using Google Maps Geocoding API with Kankinara-specific parameters
-            const apiKey = 'AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw';
-            const url = `https://maps.googleapis.com/maps/api/geocode/json
-                ?latlng=${lat},${lng}
-                &key=${apiKey}
-                &result_type=street_address|premise|sublocality|route|neighborhood|locality
-                &location_type=ROOFTOP|RANGE_INTERPOLATED
-                &region=in
-                &language=en
-                &components=locality:Kankinara|administrative_area:West%20Bengal|country:IN
-                &bounds=22.80,88.30|23.00,88.50`; // Bounding box around Kankinara area
-
-            // Add timestamp to prevent caching
-            const timestamp = new Date().getTime();
-            const cacheBustedUrl = `${url.replace(/\?/,'?')}${url.includes('?') ? '&' : '?'}_=${timestamp}`;
+            const cityDiv = document.getElementById('cityDetails');
             
-            fetch(cacheBustedUrl, {
-                headers: {
-                    'Accept': 'application/json',
-                    'Cache-Control': 'no-cache'
-                },
-                cache: 'no-store'
-            })
-            .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
+            addressDiv.textContent = 'Getting exact address...';
+            cityDiv.textContent = 'Determining exact city...';
+            
+            // Replace with your actual API key
+            const apiKey = 'AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw';
+            
+            // Enhanced Google Geocoding API request for maximum precision
+            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&result_type=street_address|premise|subpremise|establishment&location_type=ROOFTOP|RANGE_INTERPOLATED&language=en`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Google Geocoding Response:', data);
+                    
                     if (data.status === 'OK' && data.results && data.results.length > 0) {
-                        // Find the most precise result
-                        const result = data.results[0];
-                        const formattedAddress = result.formatted_address;
-                        
-                        // Get the user's name from the form
-                        const firstName = document.getElementById('firstName')?.value || '';
-                        const lastName = document.getElementById('lastName')?.value || '';
-                        const userName = firstName || lastName ? `${firstName} ${lastName}`.trim() : '';
-                        
-                        // Process address to ensure Kankinara is correctly identified
-                        let processedAddress = formattedAddress;
-                        
-                        // If address contains Naihati but we know we're in Kankinara
-                        if (processedAddress.toLowerCase().includes('naihati') && 
-                            !processedAddress.toLowerCase().includes('kankinara')) {
-                            processedAddress = processedAddress.replace(/Naihati/gi, 'Kankinara');
-                        }
-                        
-                        // Add Kankinara if missing
-                        if (!processedAddress.toLowerCase().includes('kankinara')) {
-                            processedAddress += ', Kankinara';
-                        }
-                        
-                        // Update the address display with name
-                        addressDiv.innerHTML = userName 
-                            ? `<strong>${userName}</strong><br>${processedAddress}`
-                            : processedAddress;
-                        
-                        // Update the address field in the form with name and address
-                        const addressInput = document.getElementById('address');
-                        if (addressInput) {
-                            addressInput.value = userName 
-                                ? `${userName}\n${formattedAddress}`
-                                : formattedAddress;
-                        }
-                        
-                        // If the first result isn't precise enough, try to find a better match
-                        if (result.types.includes('sublocality') && data.results.length > 1) {
-                            for (const res of data.results) {
-                                if (res.types.includes('street_address') || res.types.includes('premise')) {
-                                    addressDiv.textContent = res.formatted_address;
-                                    if (addressInput) {
-                                        addressInput.value = res.formatted_address;
-                                    }
-                                    break;
-                                }
-                            }
-                        }
+                        processLocationResults(data.results);
+                    } else if (data.status === 'ZERO_RESULTS') {
+                        // Try with broader result types if no exact results
+                        getBroaderLocationResults(lat, lng, apiKey);
                     } else {
-                        addressDiv.textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                        console.warn('No results from Google Geocoding API', data);
+                        throw new Error(`Geocoding failed: ${data.status}`);
                     }
-                    addressDiv.className = '';
                 })
                 .catch(error => {
-                    console.error('Reverse geocoding error:', error);
-                    addressDiv.textContent = `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
-                    addressDiv.className = 'error';
-                    
-                    // Fallback to OpenStreetMap if Google fails
-                    fallbackToOpenStreetMap(lat, lng);
+                    console.error('Primary geocoding error:', error);
+                    // Fallback to broader search
+                    getBroaderLocationResults(lat, lng, apiKey);
                 });
         }
-        
-        function fallbackToOpenStreetMap(lat, lng) {
-            const addressDiv = document.getElementById('approximateAddress');
-            const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1&zoom=18&email=your-email@example.com`;
+
+        function getBroaderLocationResults(lat, lng, apiKey) {
+            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`;
             
-            fetch(url, {
-                headers: {
-                    'Accept-Language': 'en',
-                    'User-Agent': 'YourApp/1.0'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data && data.display_name) {
-                    addressDiv.textContent = data.display_name;
-                    const addressInput = document.getElementById('address');
-                    if (addressInput) {
-                        addressInput.value = data.display_name;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Broader Geocoding Response:', data);
+                    
+                    if (data.status === 'OK' && data.results && data.results.length > 0) {
+                        processLocationResults(data.results);
+                    } else {
+                        fallbackToCoordinates(lat, lng);
                     }
+                })
+                .catch(error => {
+                    console.error('Broader geocoding error:', error);
+                    fallbackToCoordinates(lat, lng);
+                });
+        }
+
+        function processLocationResults(results) {
+            const addressDiv = document.getElementById('approximateAddress');
+            const cityDiv = document.getElementById('cityDetails');
+            
+            // Find the most precise result
+            const preciseResult = results[0];
+            exactLocationData = {
+                fullAddress: preciseResult.formatted_address,
+                components: preciseResult.address_components,
+                placeId: preciseResult.place_id,
+                types: preciseResult.types
+            };
+
+            // Extract city information from address components
+            let cityInfo = extractCityInformation(preciseResult.address_components);
+            
+            // Display city information
+            let cityDisplay = '';
+            if (cityInfo.locality) {
+                cityDisplay += `<strong>City/Town:</strong> ${cityInfo.locality}<br>`;
+            }
+            if (cityInfo.sublocality) {
+                cityDisplay += `<strong>Area/Locality:</strong> ${cityInfo.sublocality}<br>`;
+            }
+            if (cityInfo.district) {
+                cityDisplay += `<strong>District:</strong> ${cityInfo.district}<br>`;
+            }
+            if (cityInfo.state) {
+                cityDisplay += `<strong>State:</strong> ${cityInfo.state}<br>`;
+            }
+            if (cityInfo.country) {
+                cityDisplay += `<strong>Country:</strong> ${cityInfo.country}<br>`;
+            }
+            if (cityInfo.pincode) {
+                cityDisplay += `<strong>PIN Code:</strong> ${cityInfo.pincode}`;
+            }
+
+            cityDiv.innerHTML = cityDisplay || 'City information not available';
+            addressDiv.innerHTML = preciseResult.formatted_address;
+
+            // Update the form's address field
+            const addressInput = document.getElementById('address');
+            if (addressInput) {
+                const firstName = document.getElementById('firstName')?.value || '';
+                const lastName = document.getElementById('lastName')?.value || '';
+                const userName = firstName || lastName ? `${firstName} ${lastName}`.trim() : '';
+                
+                addressInput.value = userName 
+                    ? `${userName}\n${preciseResult.formatted_address}`
+                    : preciseResult.formatted_address;
+            }
+
+            console.log('Processed Location Data:', {
+                address: preciseResult.formatted_address,
+                cityInfo: cityInfo,
+                coordinates: currentLocation
+            });
+        }
+
+        function extractCityInformation(components) {
+            const cityInfo = {};
+            
+            components.forEach(component => {
+                const types = component.types;
+                
+                if (types.includes('locality')) {
+                    cityInfo.locality = component.long_name;
+                } else if (types.includes('sublocality') || types.includes('sublocality_level_1')) {
+                    cityInfo.sublocality = component.long_name;
+                } else if (types.includes('administrative_area_level_3')) {
+                    cityInfo.district = component.long_name;
+                } else if (types.includes('administrative_area_level_1')) {
+                    cityInfo.state = component.long_name;
+                } else if (types.includes('country')) {
+                    cityInfo.country = component.long_name;
+                } else if (types.includes('postal_code')) {
+                    cityInfo.pincode = component.long_name;
                 }
-            })
-            .catch(error => console.error('Fallback geocoding error:', error));
+            });
+            
+            return cityInfo;
+        }
+
+        function fallbackToCoordinates(lat, lng) {
+            const addressDiv = document.getElementById('approximateAddress');
+            const cityDiv = document.getElementById('cityDetails');
+            
+            addressDiv.innerHTML = `<em>Exact address not available</em><br>Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+            cityDiv.innerHTML = 'City information could not be determined from coordinates';
+            
+            console.log('Fallback to coordinates:', { lat, lng });
         }
 
         // Form submission
@@ -541,30 +353,25 @@
             // Add location data if available
             if (currentLocation) {
                 data.location = currentLocation;
+                data.exactLocationData = exactLocationData;
                 data.locationCaptured = true;
             } else {
                 data.locationCaptured = false;
             }
 
-            // Display the collected data (in a real app, this would be sent to a server)
-            console.log('Form Data:', data);
+            // Display the collected data
+            console.log('Complete Form Data with Exact Location:', data);
 
             // Show success message
             const statusDiv = document.getElementById('locationStatus');
-            statusDiv.innerHTML = '<div class="status-message success">🎉 Form submitted successfully! Check the console for submitted data.</div>';
+            statusDiv.innerHTML = '<div class="status-message success">🎉 Form submitted successfully with exact location data! Check the console for complete details.</div>';
 
-            // In a real application, you would send this data to your server:
+            // In a real application, send to server:
             // fetch('/api/submit-form', {
             //     method: 'POST',
             //     headers: { 'Content-Type': 'application/json' },
             //     body: JSON.stringify(data)
             // });
-        });
-
-        // Auto-detect location on page load (optional)
-        window.addEventListener('load', function () {
-            // Uncomment the next line if you want to auto-request location on page load
-            // document.getElementById('getLocationBtn').click();
         });
     </script>
 </body>

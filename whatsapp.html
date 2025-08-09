@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Bulk Message Sender</title>
+    <style>
+        * { box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #25D366; text-align: center; }
+        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .btn { 
+            background: #25D366; color: white; border: none; padding: 10px 20px; 
+            border-radius: 5px; cursor: pointer; margin: 5px 0; display: inline-block;
+        }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        textarea { width: 100%; padding: 10px; margin: 10px 0; min-height: 100px; }
+        #status { margin: 10px 0; padding: 10px; border-radius: 5px; display: none; }
+        .progress { width: 100%; background: #e0e0e0; border-radius: 5px; margin: 10px 0; height: 10px; display: none; }
+        .progress-bar { height: 100%; background: #25D366; width: 0%; transition: width 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WhatsApp Bulk Message Sender</h1>
+        
+        <div class="section">
+            <h3>1. Upload Contacts (CSV/Excel)</h3>
+            <input type="file" id="fileInput" accept=".csv, .xlsx, .xls">
+            <p><small>File should have 'phone' column (with country code, e.g., +911234567890)</small></p>
+            <p id="fileInfo">No file selected</p>
+        </div>
+
+        <div class="section">
+            <h3>2. Compose Message</h3>
+            <p>Use {name} for personalized messages</p>
+            <textarea id="message" placeholder="Hello {name}, this is a test message."></textarea>
+            <button id="previewBtn" class="btn">Preview Message</button>
+            <div id="preview" style="margin-top: 10px; display: none;">
+                <strong>Preview:</strong>
+                <div id="messagePreview"></div>
+            </div>
+        </div>
+
+        <div class="section" style="text-align: center;">
+            <button id="sendBtn" class="btn" disabled>Send Messages</button>
+            <div class="progress">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let contacts = [];
+        
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            document.getElementById('fileInfo').textContent = `Selected: ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    contacts = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    if (contacts.length > 0) {
+                        document.getElementById('sendBtn').disabled = false;
+                        showStatus(`Loaded ${contacts.length} contacts`, 'success');
+                    } else {
+                        showStatus('No contacts found in file', 'error');
+                    }
+                } catch (error) {
+                    showStatus('Error reading file: ' + error.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('previewBtn').addEventListener('click', function() {
+            const message = document.getElementById('message').value;
+            if (!message) {
+                showStatus('Please enter a message', 'error');
+                return;
+            }
+            
+            if (contacts.length === 0) {
+                showStatus('Please upload contacts first', 'error');
+                return;
+            }
+            
+            const preview = document.getElementById('messagePreview');
+            const sampleContact = contacts[0];
+            let previewText = message;
+            
+            // Replace variables in the message
+            Object.keys(sampleContact).forEach(key => {
+                const regex = new RegExp(`{${key}}`, 'gi');
+                previewText = previewText.replace(regex, sampleContact[key]);
+            });
+            
+            preview.innerHTML = previewText.replace(/\n/g, '<br>');
+            document.getElementById('preview').style.display = 'block';
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', async function() {
+            const message = document.getElementById('message').value;
+            if (!message) {
+                showStatus('Please enter a message', 'error');
+                return;
+            }
+            
+            if (contacts.length === 0) {
+                showStatus('No contacts to send to', 'error');
+                return;
+            }
+            
+            const progressBar = document.querySelector('.progress');
+            const progressBarFill = document.getElementById('progressBar');
+            progressBar.style.display = 'block';
+            
+            let successCount = 0;
+            let failCount = 0;
+            
+            for (let i = 0; i < contacts.length; i++) {
+                const contact = contacts[i];
+                let personalizedMessage = message;
+                
+                // Replace variables in the message
+                Object.keys(contact).forEach(key => {
+                    const regex = new RegExp(`{${key}}`, 'gi');
+                    personalizedMessage = personalizedMessage.replace(regex, contact[key]);
+                });
+                
+                // Format phone number (remove any non-digit characters except +)
+                const phone = (contact.phone || '').replace(/[^\d+]/g, '');
+                
+                if (!phone) {
+                    failCount++;
+                    continue;
+                }
+                
+                // Encode message for URL
+                const encodedMessage = encodeURIComponent(personalizedMessage);
+                const whatsappUrl = `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
+                
+                // Open WhatsApp Web in a new tab
+                const newWindow = window.open(whatsappUrl, '_blank');
+                
+                // Update progress
+                const progress = Math.round(((i + 1) / contacts.length) * 100);
+                progressBarFill.style.width = `${progress}%`;
+                showStatus(`Sending ${i + 1} of ${contacts.length}...`, 'info');
+                
+                // Wait a bit before sending the next message
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                // Close the tab after a delay
+                if (newWindow) {
+                    setTimeout(() => {
+                        try { newWindow.close(); } catch(e) {}
+                    }, 2000);
+                }
+                
+                successCount++;
+                
+                // Add a small delay between messages
+                if (i < contacts.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+            
+            showStatus(`Sent ${successCount} messages successfully, ${failCount} failed`, 'success');
+            progressBarFill.style.width = '100%';
+        });
+        
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.style.display = 'block';
+            status.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue';
+        }
+    </script>
+</body>
+</html>
