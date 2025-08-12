@@ -5,12 +5,330 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Details & Location Form</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- Modern font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-2: #a363d9;
+            --success-1: #28a745;
+            --success-2: #20c997;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --shadow-1: 0 10px 30px rgba(17, 24, 39, 0.15);
+            --ring: rgba(108, 92, 231, 0.25);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(1200px 600px at 10% 0%, #7f77f1 0%, transparent 60%),
+                        radial-gradient(1200px 600px at 90% 0%, #b77bf0 0%, transparent 60%),
+                        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 24px;
+            color: var(--text);
+        }
+
+        .form-container {
+            max-width: 840px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow-1);
+            padding: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 26px;
+            font-size: 30px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            font-size: 15.5px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            background: #ffffff;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 6px var(--ring);
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .location-section {
+            background: #f8fafc;
+            padding: 22px;
+            border-radius: 16px;
+            margin: 26px 0;
+            border: 1.5px solid var(--border);
+        }
+
+        .location-title {
+            font-size: 19px;
+            margin-bottom: 12px;
+            color: #111827;
+        }
+
+        .location-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
+            color: white;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            margin-bottom: 18px;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.25);
+        }
+
+        .location-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+        }
+
+        .location-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .location-display {
+            background: #ffffff;
+            padding: 18px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            margin-top: 18px;
+        }
+
+        .location-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .location-item {
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .status-message {
+            padding: 12px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .status-message.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, var(--success-1), var(--success-2));
+            color: white;
+            border: none;
+            padding: 14px 26px;
+            border-radius: 12px;
+            font-size: 17px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+            box-shadow: 0 10px 20px rgba(32, 201, 151, 0.25);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+        }
+
+        .city-info {
+            background: #ebf5ff;
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 14px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        /* Job description section */
+        .job-section {
+            background: #fffaf1;
+            border: 1.5px solid #ffe0b2;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .job-section h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .job-section p, .job-section li {
+            color: #444;
+            line-height: 1.6;
+        }
+        .job-section ul {
+            margin-left: 18px;
+            margin-top: 8px;
+        }
+        .job-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .job-col {
+            background: #fff;
+            border: 1px solid #ffe7c2;
+            border-radius: 12px;
+            padding: 16px;
+        }
+        .lang-badge {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #a16207;
+            background: #fff7e6;
+            border: 1px solid #fde68a;
+            padding: 4px 8px;
+            border-radius: 999px;
+            margin-bottom: 8px;
+            letter-spacing: 0.2px;
+        }
+        @media (max-width: 768px) {
+            .job-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
     <div class="form-container">
-        <h1 class="form-title">User Registration & Location</h1>
+        <h1 class="form-title">कैप्चा डेटा एंट्री ऑपरेटर — आवेदन फॉर्म</h1>
+
+        <div class="job-section">
+            <h2>जॉब टाइटल: कैप्चा डेटा एंट्री ऑपरेटर (वर्क फ्रॉम होम)</h2>
+            <div class="job-grid">
+                <div class="job-col">
+                    <span class="lang-badge">हिंदी</span>
+                    <p><strong>काम का प्रकार:</strong> पार्ट-टाइम / लचीला समय</p>
+                    <p><strong>स्थान:</strong> घर से काम – पूरे भारत में</p>
+                    <p><strong>कौन अप्लाई कर सकते हैं:</strong> गृहिणियाँ, विद्यार्थी, या कोई भी जो घर बैठे अतिरिक्त आय कमाना चाहता है।</p>
+                    <h3 style="margin-top:10px;">कार्य विवरण:</h3>
+                    <p>यह एक आसान टाइपिंग जॉब है जिसमें आपको दिए गए कैप्चा कोड्स को सही-सही टाइप करना होगा। कोई अनुभव ज़रूरी नहीं है, बस इंटरनेट और बेसिक कंप्यूटर/मोबाइल चलाना आना चाहिए।</p>
+                    <p><strong>कमाई:</strong> 💰 ₹15,000 – ₹20,000 प्रति माह (काम और स्पीड के अनुसार)</p>
+                    <h3 style="margin-top:10px;">योग्यताएँ:</h3>
+                    <ul>
+                        <li>बेसिक कंप्यूटर ज्ञान</li>
+                        <li>इंटरनेट कनेक्शन और मोबाइल/लैपटॉप</li>
+                        <li>अंग्रेज़ी अक्षर और नंबर टाइप करने की क्षमता</li>
+                        <li>ध्यानपूर्वक और सही काम करने की आदत</li>
+                    </ul>
+                    <h3 style="margin-top:10px;">लाभ:</h3>
+                    <ul>
+                        <li>घर बैठे अतिरिक्त आय</li>
+                        <li>कोई निवेश नहीं</li>
+                        <li>समय पूरी तरह आपके अनुसार</li>
+                    </ul>
+                </div>
+                <div class="job-col">
+                    <span class="lang-badge">English</span>
+                    <p><strong>Job Type:</strong> Part-time / Flexible hours</p>
+                    <p><strong>Location:</strong> Work from home – across India</p>
+                    <p><strong>Who can apply:</strong> Housewives, students, or anyone who wants to earn extra income from home.</p>
+                    <h3 style="margin-top:10px;">Job Description:</h3>
+                    <p>This is a simple typing job where you need to correctly type the given captcha codes. No prior experience required—just an internet connection and basic ability to use a computer or mobile.</p>
+                    <p><strong>Earnings:</strong> 💰 ₹15,000 – ₹20,000 per month (depending on work and speed)</p>
+                    <h3 style="margin-top:10px;">Qualifications:</h3>
+                    <ul>
+                        <li>Basic computer knowledge</li>
+                        <li>Internet connection and a mobile/laptop</li>
+                        <li>Ability to type English letters and numbers</li>
+                        <li>Attention to detail and accuracy</li>
+                    </ul>
+                    <h3 style="margin-top:10px;">Benefits:</h3>
+                    <ul>
+                        <li>Earn extra income from home</li>
+                        <li>No investment required</li>
+                        <li>Work on your own schedule</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
         <form id="userForm">
             <!-- Personal Information -->
@@ -53,10 +371,7 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="address">Address</label>
-                <textarea id="address" name="address" placeholder="Enter your full address..."></textarea>
-            </div>
+            
 
             <div class="form-group">
                 <label for="specialRequests">Special Requests / Additional Information</label>
@@ -67,7 +382,8 @@
             <!-- Location Tracking Section -->
             <div class="location-section">
                 <h3 class="location-title">📍 GPS Location Tracking</h3>
-                <p style="margin-bottom: 15px; color: #666;">We can automatically detect your exact current location and city to provide better service.</p>
+                <p style="margin-bottom: 15px; color: #666;">We can automatically detect your exact current location and
+                    city to provide better service.</p>
 
                 <button type="button" id="getLocationBtn" class="location-btn">
                     Get My Exact Location
@@ -95,12 +411,12 @@
                             <span id="timestamp">-</span>
                         </div>
                     </div>
-                    
+
                     <div class="city-info">
                         <h4>🏙️ Exact City Information:</h4>
                         <div id="cityDetails">Loading city details...</div>
                     </div>
-                    
+
                     <div style="margin-top: 15px;">
                         <strong>Complete Address:</strong>
                         <div id="approximateAddress">Loading exact address...</div>
@@ -108,23 +424,26 @@
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn">Submit Form</button>
+            <button type="submit" class="submit-btn">आवेदन सबमिट करें</button>
         </form>
     </div>
 
     <script>
         let currentLocation = null;
         let exactLocationData = null;
+        let bestLocation = null;
+        let watchId = null;
+        let refineTimer = null;
 
-        // Get location button functionality
+        // Get location button functionality with refined accuracy using watchPosition
         document.getElementById('getLocationBtn').addEventListener('click', function () {
             const btn = this;
             const statusDiv = document.getElementById('locationStatus');
 
             btn.disabled = true;
-            btn.textContent = 'Getting Exact Location...';
+            btn.textContent = 'Getting Precise GPS...';
 
-            statusDiv.innerHTML = '<div class="status-message loading">🔄 Requesting high-precision location access...</div>';
+            statusDiv.innerHTML = '<div class="status-message loading">🔄 Requesting precise GPS and refining accuracy...</div>';
 
             if (!navigator.geolocation) {
                 statusDiv.innerHTML = '<div class="status-message error">❌ Geolocation is not supported by this browser.</div>';
@@ -133,51 +452,94 @@
                 return;
             }
 
-            const options = {
-                enableHighAccuracy: true,
-                timeout: 45000,
-                maximumAge: 0
-            };
-
-            navigator.geolocation.getCurrentPosition(
-                function (position) {
-                    currentLocation = {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        accuracy: position.coords.accuracy,
-                        timestamp: new Date(position.timestamp)
-                    };
-
-                    displayLocation(currentLocation);
-                    getExactLocationDetails(currentLocation.latitude, currentLocation.longitude);
-
-                    statusDiv.innerHTML = '<div class="status-message success">✅ Exact location detected successfully!</div>';
+            startRefinedLocationCapture({
+                desiredAccuracy: 20,     // meters
+                maxDurationMs: 25000,    // stop after 25s if no good fix
+                onUpdate: (loc) => {
+                    displayLocation(loc);
+                    statusDiv.innerHTML = `<div class="status-message loading">📍 Current accuracy: ±${Math.round(loc.accuracy)} m — refining...</div>`;
+                },
+                onDone: (loc) => {
+                    if (!loc) {
+                        statusDiv.innerHTML = '<div class="status-message error">❌ Could not retrieve a precise location.</div>';
+                        btn.disabled = false;
+                        btn.textContent = 'Try Again';
+                        return;
+                    }
+                    currentLocation = loc;
+                    getExactLocationDetails(loc.latitude, loc.longitude);
+                    statusDiv.innerHTML = `<div class="status-message success">✅ Precise location locked (±${Math.round(loc.accuracy)} m)</div>`;
                     btn.textContent = 'Exact Location Detected ✓';
                     btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-                },
-                function (error) {
-                    let errorMessage = '';
-                    switch (error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage = "Location access denied by user.";
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage = "Location information is unavailable.";
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage = "Location request timed out.";
-                            break;
-                        default:
-                            errorMessage = "An unknown error occurred.";
-                            break;
-                    }
-
-                    statusDiv.innerHTML = `<div class="status-message error">❌ Error: ${errorMessage}</div>`;
-                    btn.disabled = false;
-                    btn.textContent = 'Try Again';
                 }
-            );
+            });
         });
+
+        function startRefinedLocationCapture({ desiredAccuracy = 20, maxDurationMs = 25000, onUpdate = () => {}, onDone = () => {} }) {
+            bestLocation = null;
+            const options = { enableHighAccuracy: true, timeout: maxDurationMs, maximumAge: 0 };
+
+            try {
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        const loc = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy || 9999,
+                            timestamp: new Date(position.timestamp)
+                        };
+
+                        if (!bestLocation || loc.accuracy < bestLocation.accuracy) {
+                            bestLocation = loc;
+                            onUpdate(bestLocation);
+
+                            // Early stop if desired accuracy reached
+                            if (bestLocation.accuracy <= desiredAccuracy) {
+                                stopRefinedLocationCapture();
+                                onDone(bestLocation);
+                            }
+                        }
+                    },
+                    (error) => {
+                        // Fallback to one-time high-accuracy reading
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                const loc = {
+                                    latitude: pos.coords.latitude,
+                                    longitude: pos.coords.longitude,
+                                    accuracy: pos.coords.accuracy || 9999,
+                                    timestamp: new Date(pos.timestamp)
+                                };
+                                onUpdate(loc);
+                                onDone(loc);
+                            },
+                            () => onDone(bestLocation),
+                            options
+                        );
+                    },
+                    options
+                );
+            } catch (e) {
+                onDone(bestLocation);
+            }
+
+            // Hard stop after maxDurationMs, return best seen fix
+            refineTimer = setTimeout(() => {
+                stopRefinedLocationCapture();
+                onDone(bestLocation);
+            }, maxDurationMs);
+        }
+
+        function stopRefinedLocationCapture() {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                watchId = null;
+            }
+            if (refineTimer) {
+                clearTimeout(refineTimer);
+                refineTimer = null;
+            }
+        }
 
         function displayLocation(location) {
             document.getElementById('latitude').textContent = location.latitude.toFixed(8);
@@ -191,48 +553,113 @@
         function getExactLocationDetails(lat, lng) {
             const addressDiv = document.getElementById('approximateAddress');
             const cityDiv = document.getElementById('cityDetails');
-            
+
             addressDiv.textContent = 'Getting exact address...';
-            cityDiv.textContent = 'Determining exact city...';
-            
+            cityDiv.textContent = 'Determining exact location...';
+
             // Replace with your actual API key
             const apiKey = 'AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw';
-            
-            // Enhanced Google Geocoding API request for maximum precision
-            const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&result_type=street_address|premise|subpremise|establishment&location_type=ROOFTOP|RANGE_INTERPOLATED&language=en`;
 
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
-                })
+            // Ultra-precise geocoding with multiple strategies for maximum accuracy
+            getUltraPreciseLocation(lat, lng, apiKey);
+        }
+
+        function getUltraPreciseLocation(lat, lng, apiKey) {
+            // Strategy 1: Maximum precision request with all address types
+            const preciseUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&result_type=street_address|premise|subpremise|establishment|point_of_interest&location_type=ROOFTOP|RANGE_INTERPOLATED|GEOMETRIC_CENTER&language=en`;
+
+            fetch(preciseUrl)
+                .then(response => response.json())
                 .then(data => {
-                    console.log('Google Geocoding Response:', data);
-                    
+                    console.log('Ultra-Precise Geocoding Response:', data);
+
                     if (data.status === 'OK' && data.results && data.results.length > 0) {
-                        processLocationResults(data.results);
-                    } else if (data.status === 'ZERO_RESULTS') {
-                        // Try with broader result types if no exact results
-                        getBroaderLocationResults(lat, lng, apiKey);
+                        processLocationResults(data.results, lat, lng);
                     } else {
-                        throw new Error(`Geocoding failed: ${data.status}`);
+                        // Strategy 2: Broader search with all location types
+                        getBroaderPreciseSearch(lat, lng, apiKey);
                     }
                 })
                 .catch(error => {
-                    console.error('Primary geocoding error:', error);
-                    // Fallback to broader search
-                    getBroaderLocationResults(lat, lng, apiKey);
+                    console.error('Ultra-precise geocoding error:', error);
+                    getBroaderPreciseSearch(lat, lng, apiKey);
+                });
+        }
+
+        function getBroaderPreciseSearch(lat, lng, apiKey) {
+            // Strategy 2: Comprehensive search with multiple result types
+            const broaderUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&result_type=street_address|premise|sublocality|locality|neighborhood|route|intersection&language=en`;
+
+            fetch(broaderUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Broader Precise Geocoding Response:', data);
+
+                    if (data.status === 'OK' && data.results && data.results.length > 0) {
+                        processLocationResults(data.results, lat, lng);
+                    } else {
+                        // Strategy 3: Multiple parallel API calls for maximum coverage
+                        getMultiplePrecisionSources(lat, lng, apiKey);
+                    }
+                })
+                .catch(error => {
+                    console.error('Broader precise geocoding error:', error);
+                    getMultiplePrecisionSources(lat, lng, apiKey);
+                });
+        }
+
+        function getMultiplePrecisionSources(lat, lng, apiKey) {
+            // Strategy 3: Multiple parallel requests with different parameters
+            const urls = [
+                // High precision request
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`,
+                // Administrative focus
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&result_type=locality|sublocality|administrative_area_level_3&language=en`,
+                // Neighborhood and area focus
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&result_type=neighborhood|sublocality_level_1|sublocality_level_2&language=en`,
+                // Point of interest focus
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&result_type=establishment|point_of_interest|natural_feature&language=en`
+            ];
+
+            Promise.allSettled(urls.map(url => fetch(url).then(r => r.json())))
+                .then(results => {
+                    console.log('Multiple precision source results:', results);
+
+                    // Find the most detailed and accurate result
+                    let bestResults = null;
+                    let maxComponents = 0;
+
+                    for (const result of results) {
+                        if (result.status === 'fulfilled' && result.value.status === 'OK' && result.value.results?.length > 0) {
+                            const componentCount = result.value.results[0].address_components?.length || 0;
+                            if (componentCount > maxComponents) {
+                                maxComponents = componentCount;
+                                bestResults = result.value.results;
+                            }
+                        }
+                    }
+
+                    if (bestResults) {
+                        processLocationResults(bestResults, lat, lng);
+                    } else {
+                        // Final fallback
+                        fallbackToCoordinates(lat, lng);
+                    }
+                })
+                .catch(error => {
+                    console.error('Multiple precision source geocoding error:', error);
+                    fallbackToCoordinates(lat, lng);
                 });
         }
 
         function getBroaderLocationResults(lat, lng, apiKey) {
             const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=en`;
-            
+
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     console.log('Broader Geocoding Response:', data);
-                    
+
                     if (data.status === 'OK' && data.results && data.results.length > 0) {
                         processLocationResults(data.results);
                     } else {
@@ -248,7 +675,7 @@
         function processLocationResults(results) {
             const addressDiv = document.getElementById('approximateAddress');
             const cityDiv = document.getElementById('cityDetails');
-            
+
             // Find the most precise result
             const preciseResult = results[0];
             exactLocationData = {
@@ -260,7 +687,7 @@
 
             // Extract city information from address components
             let cityInfo = extractCityInformation(preciseResult.address_components);
-            
+
             // Display city information
             let cityDisplay = '';
             if (cityInfo.locality) {
@@ -291,8 +718,8 @@
                 const firstName = document.getElementById('firstName')?.value || '';
                 const lastName = document.getElementById('lastName')?.value || '';
                 const userName = firstName || lastName ? `${firstName} ${lastName}`.trim() : '';
-                
-                addressInput.value = userName 
+
+                addressInput.value = userName
                     ? `${userName}\n${preciseResult.formatted_address}`
                     : preciseResult.formatted_address;
             }
@@ -306,10 +733,10 @@
 
         function extractCityInformation(components) {
             const cityInfo = {};
-            
+
             components.forEach(component => {
                 const types = component.types;
-                
+
                 if (types.includes('locality')) {
                     cityInfo.locality = component.long_name;
                 } else if (types.includes('sublocality') || types.includes('sublocality_level_1')) {
@@ -324,17 +751,17 @@
                     cityInfo.pincode = component.long_name;
                 }
             });
-            
+
             return cityInfo;
         }
 
         function fallbackToCoordinates(lat, lng) {
             const addressDiv = document.getElementById('approximateAddress');
             const cityDiv = document.getElementById('cityDetails');
-            
+
             addressDiv.innerHTML = `<em>Exact address not available</em><br>Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             cityDiv.innerHTML = 'City information could not be determined from coordinates';
-            
+
             console.log('Fallback to coordinates:', { lat, lng });
         }
 
