@@ -1,7 +1,7 @@
 # 🌍 User Location Tracking System
 
 > **Built with ❤️ by MD Affan Asghar**  
-> [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat&logo=linkedin)](https://linkedin.com/in/affan-asghar)  
+> [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat&logo=linkedin)](https://linkedin.com/in/mdaffanasghar)  
 > [![GitHub](https://img.shields.io/badge/GitHub-Follow-black?style=flat&logo=github)](https://github.com/affancoder)
 
 A full-stack web application for capturing, storing, and managing user location data with an interactive dashboard.

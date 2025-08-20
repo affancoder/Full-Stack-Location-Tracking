@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>User Details & Location Form</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>">
     <!-- Modern font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +16,7 @@
 <body>
     <div class="form-container">
         <h1 class="form-title">कैप्चा डेटा एंट्री ऑपरेटर — आवेदन फॉर्म</h1>
+        <div id="locationStatus" class="status-container"></div>
 
         <div class="job-section">
             <h2>जॉब टाइटल: कैप्चा डेटा एंट्री ऑपरेटर (वर्क फ्रॉम होम)</h2>
@@ -163,44 +165,77 @@
         let watchId = null;
         let refineTimer = null;
 
-        // Get location button functionality with refined accuracy using watchPosition
-        document.getElementById('getLocationBtn').addEventListener('click', function () {
-            const btn = this;
+        // Form submission handler
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
             const statusDiv = document.getElementById('locationStatus');
+            const locationDisplay = document.getElementById('locationDisplay');
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.textContent;
+            
+            // Disable submit button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Getting Location...';
+            submitBtn.style.background = '#';
+            
+            // Show loading message
+            statusDiv.innerHTML = '<div class="status-message loading">🔍 Getting your precise location (this may take 10-15 seconds)...</div>';
+            
+            try {
+                // Start the refined location capture
+                const location = await new Promise((resolve) => {
+                    startRefinedLocationCapture({
+                        desiredAccuracy: 20, // 20 meters accuracy
+                        maxDurationMs: 15000, // 15 seconds max
+                        onUpdate: (loc) => {
+                            // Update status during capture
+                            statusDiv.innerHTML = `
+                                <div class="status-message loading">
+                                    🔍 Getting precise location...<br>
+                                    Current accuracy: ${Math.round(loc.accuracy)} meters
+                                </div>`;
+                        },
+                        onDone: (loc) => {
+                            if (loc) {
+                                currentLocation = loc;
+                                displayLocation(loc);
+                                locationDisplay.style.display = 'block';
+                                resolve(loc);
+                            } else {
+                                resolve(null);
+                            }
+                        }
+                    });
+                });
 
-            btn.disabled = true;
-            btn.textContent = 'Getting Precise GPS...';
-
-            statusDiv.innerHTML = '<div class="status-message loading">🔄 Requesting precise GPS and refining accuracy...</div>';
-
-            if (!navigator.geolocation) {
-                statusDiv.innerHTML = '<div class="status-message error">❌ Geolocation is not supported by this browser.</div>';
-                btn.disabled = false;
-                btn.textContent = 'Get My Exact Location';
-                return;
-            }
-
-            startRefinedLocationCapture({
-                desiredAccuracy: 20,     // meters
-                maxDurationMs: 25000,    // stop after 25s if no good fix
-                onUpdate: (loc) => {
-                    displayLocation(loc);
-                    statusDiv.innerHTML = `<div class="status-message loading">📍 Current accuracy: ±${Math.round(loc.accuracy)} m — refining...</div>`;
-                },
-                onDone: (loc) => {
-                    if (!loc) {
-                        statusDiv.innerHTML = '<div class="status-message error">❌ Could not retrieve a precise location.</div>';
-                        btn.disabled = false;
-                        btn.textContent = 'Try Again';
-                        return;
+                if (location) {
+                    statusDiv.innerHTML = '<div class="status-message success">✅ Location captured! Submitting form...</div>';
+                    
+                    // Submit the form with location data
+                    const result = await submitFormData(location);
+                    
+                    if (result.success) {
+                        statusDiv.innerHTML = '<div class="status-message success">🎉 Form submitted successfully! Your data has been saved to the database.</div>';
+                        // Reset form after successful submission
+                        this.reset();
+                        // Hide location display
+                        locationDisplay.style.display = 'none';
+                    } else {
+                        throw new Error(result.message || 'Failed to submit form');
                     }
-                    currentLocation = loc;
-                    getExactLocationDetails(loc.latitude, loc.longitude);
-                    statusDiv.innerHTML = `<div class="status-message success">✅ Precise location locked (±${Math.round(loc.accuracy)} m)</div>`;
-                    btn.textContent = 'Exact Location Detected ✓';
-                    btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                } else {
+                    throw new Error('Could not get precise location. Please try again.');
                 }
-            });
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.innerHTML = `<div class="status-message error">❌ ${error.message || 'An error occurred. Please try again.'}</div>`;
+            } finally {
+                // Re-enable submit button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalBtnText;
+                submitBtn.style.background = '';
+            }
         });
 
         function startRefinedLocationCapture({ desiredAccuracy = 20, maxDurationMs = 25000, onUpdate = () => {}, onDone = () => {} }) {
@@ -493,11 +528,9 @@
             console.log('Fallback to coordinates:', { lat, lng });
         }
 
-        // Form submission
-        document.getElementById('userForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const formData = new FormData(this);
+        // Function to submit form data
+        function submitFormData(locationData = null) {
+            const formData = new FormData(document.getElementById('userForm'));
             const data = {};
 
             // Collect form data
@@ -506,8 +539,8 @@
             }
 
             // Add location data if available
-            if (currentLocation) {
-                data.location = currentLocation;
+            if (locationData) {
+                data.location = locationData;
                 data.exactLocationData = exactLocationData;
                 data.locationCaptured = true;
             } else {
@@ -522,17 +555,25 @@
             statusDiv.innerHTML = '<div class="status-message loading">🔄 Submitting form data to database...</div>';
 
             // Send data to MongoDB through our server API
-            fetch('/api/submit-form', {
+            return fetch('/api/submit-form', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             })
-            .then(response => {
+            .then(async response => {
                 // Store the status code for error handling
                 const statusCode = response.status;
-                return response.json().then(data => {
+                try {
+                    const data = await response.json();
                     return { ...data, statusCode };
-                });
+                } catch (error) {
+                    // If response is not JSON, return the status text
+                    return { 
+                        success: false, 
+                        message: response.statusText || 'Invalid response from server',
+                        statusCode 
+                    };
+                }
             })
             .then(result => {
                 if (result.success) {
@@ -541,11 +582,13 @@
                     document.getElementById('userForm').reset();
                     // Hide location display
                     document.getElementById('locationDisplay').style.display = 'none';
-                    // Reset location button
+                    // Reset location button if it exists
                     const locationBtn = document.getElementById('getLocationBtn');
-                    locationBtn.disabled = false;
-                    locationBtn.textContent = 'Get My Exact Location';
-                    locationBtn.style.background = '';
+                    if (locationBtn) {
+                        locationBtn.disabled = false;
+                        locationBtn.textContent = 'Get My Exact Location';
+                        locationBtn.style.background = '';
+                    }
                 } else {
                     // Handle different types of errors with specific messages
                     let errorMessage = result.message || 'Unknown error occurred';
@@ -578,13 +621,14 @@
                         });
                     }
                 }
+                return result;
             })
             .catch(error => {
-                console.error('Error submitting form:', error);
-                statusDiv.innerHTML = '<div class="status-message error">❌ Network error. Could not connect to the server. Please check your internet connection and try again.</div>';
-            });}
-        );
-    </script>
+                console.error('Error in form submission:', error);
+                statusDiv.innerHTML = '<div class="status-message error">❌ An unexpected error occurred. Please try again.</div>';
+                throw error; // Re-throw to allow further error handling
+            });
+        }
+</script>
 </body>
-
 </html>
