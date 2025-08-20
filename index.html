@@ -3,277 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>User Details & Location Form</title>
     <!-- Modern font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6c5ce7;
-            --primary-2: #a363d9;
-            --success-1: #28a745;
-            --success-2: #20c997;
-            --text: #1f2937;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --card-bg: rgba(255, 255, 255, 0.75);
-            --shadow-1: 0 10px 30px rgba(17, 24, 39, 0.15);
-            --ring: rgba(108, 92, 231, 0.25);
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: radial-gradient(1200px 600px at 10% 0%, #7f77f1 0%, transparent 60%),
-                        radial-gradient(1200px 600px at 90% 0%, #b77bf0 0%, transparent 60%),
-                        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 24px;
-            color: var(--text);
-        }
-
-        .form-container {
-            max-width: 840px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: var(--shadow-1);
-            padding: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-        }
-
-        .form-title {
-            text-align: center;
-            color: #333;
-            margin-bottom: 26px;
-            font-size: 30px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 18px;
-            margin-bottom: 18px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1.5px solid var(--border);
-            border-radius: 10px;
-            font-size: 15.5px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-            background: #ffffff;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 6px var(--ring);
-        }
-
-        .form-group textarea {
-            height: 100px;
-            resize: vertical;
-        }
-
-        .location-section {
-            background: #f8fafc;
-            padding: 22px;
-            border-radius: 16px;
-            margin: 26px 0;
-            border: 1.5px solid var(--border);
-        }
-
-        .location-title {
-            font-size: 19px;
-            margin-bottom: 12px;
-            color: #111827;
-        }
-
-        .location-btn {
-            background: linear-gradient(135deg, var(--primary), var(--primary-2));
-            color: white;
-            border: none;
-            padding: 14px 22px;
-            border-radius: 12px;
-            font-size: 15px;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
-            margin-bottom: 18px;
-            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.25);
-        }
-
-        .location-btn:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.03);
-        }
-
-        .location-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .location-display {
-            background: #ffffff;
-            padding: 18px;
-            border-radius: 12px;
-            border: 1.5px solid var(--border);
-            margin-top: 18px;
-        }
-
-        .location-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin: 15px 0;
-        }
-
-        .location-item {
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 5px;
-        }
-
-        .status-message {
-            padding: 12px;
-            border-radius: 10px;
-            margin: 10px 0;
-        }
-
-        .status-message.loading {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
-
-        .status-message.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-message.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, var(--success-1), var(--success-2));
-            color: white;
-            border: none;
-            padding: 14px 26px;
-            border-radius: 12px;
-            font-size: 17px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 20px;
-            transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
-            box-shadow: 0 10px 20px rgba(32, 201, 151, 0.25);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.03);
-        }
-
-        .city-info {
-            background: #ebf5ff;
-            padding: 14px;
-            border-radius: 12px;
-            margin-top: 14px;
-            border-left: 4px solid #3b82f6;
-        }
-
-        /* Job description section */
-        .job-section {
-            background: #fffaf1;
-            border: 1.5px solid #ffe0b2;
-            border-radius: 14px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-        .job-section h2 {
-            font-size: 22px;
-            margin-bottom: 10px;
-            color: #333;
-        }
-        .job-section p, .job-section li {
-            color: #444;
-            line-height: 1.6;
-        }
-        .job-section ul {
-            margin-left: 18px;
-            margin-top: 8px;
-        }
-        .job-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 10px;
-        }
-        .job-col {
-            background: #fff;
-            border: 1px solid #ffe7c2;
-            border-radius: 12px;
-            padding: 16px;
-        }
-        .lang-badge {
-            display: inline-block;
-            font-size: 12px;
-            font-weight: 600;
-            color: #a16207;
-            background: #fff7e6;
-            border: 1px solid #fde68a;
-            padding: 4px 8px;
-            border-radius: 999px;
-            margin-bottom: 8px;
-            letter-spacing: 0.2px;
-        }
-        @media (max-width: 768px) {
-            .job-grid { grid-template-columns: 1fr; }
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .form-container {
-                padding: 20px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -781,17 +517,73 @@
             // Display the collected data
             console.log('Complete Form Data with Exact Location:', data);
 
-            // Show success message
+            // Show loading message
             const statusDiv = document.getElementById('locationStatus');
-            statusDiv.innerHTML = '<div class="status-message success">🎉 Form submitted successfully with exact location data! Check the console for complete details.</div>';
+            statusDiv.innerHTML = '<div class="status-message loading">🔄 Submitting form data to database...</div>';
 
-            // In a real application, send to server:
-            // fetch('/api/submit-form', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(data)
-            // });
-        });
+            // Send data to MongoDB through our server API
+            fetch('/api/submit-form', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                // Store the status code for error handling
+                const statusCode = response.status;
+                return response.json().then(data => {
+                    return { ...data, statusCode };
+                });
+            })
+            .then(result => {
+                if (result.success) {
+                    statusDiv.innerHTML = '<div class="status-message success">🎉 Form submitted successfully! Your data has been saved to the database.</div>';
+                    // Reset form after successful submission
+                    document.getElementById('userForm').reset();
+                    // Hide location display
+                    document.getElementById('locationDisplay').style.display = 'none';
+                    // Reset location button
+                    const locationBtn = document.getElementById('getLocationBtn');
+                    locationBtn.disabled = false;
+                    locationBtn.textContent = 'Get My Exact Location';
+                    locationBtn.style.background = '';
+                } else {
+                    // Handle different types of errors with specific messages
+                    let errorMessage = result.message || 'Unknown error occurred';
+                    
+                    // Add more details for specific error types
+                    if (result.statusCode === 400 && result.missingFields) {
+                        errorMessage += `: Missing required fields (${result.missingFields.join(', ')})`;
+                    } else if (result.statusCode === 400 && result.errors) {
+                        const errorDetails = Object.entries(result.errors)
+                            .map(([field, msg]) => `${field}: ${msg}`)
+                            .join(', ');
+                        errorMessage += `: ${errorDetails}`;
+                    } else if (result.statusCode === 409) {
+                        errorMessage = 'A record with this information already exists in the database';
+                    } else if (result.error) {
+                        errorMessage += `: ${result.error}`;
+                    }
+                    
+                    console.error('Form submission error:', result);
+                    statusDiv.innerHTML = `<div class="status-message error">❌ Error: ${errorMessage}</div>`;
+                    
+                    // Highlight missing fields if applicable
+                    if (result.missingFields) {
+                        result.missingFields.forEach(field => {
+                            const inputField = document.getElementById(field);
+                            if (inputField) {
+                                inputField.style.borderColor = '#ff4d4f';
+                                inputField.style.boxShadow = '0 0 0 2px rgba(255, 77, 79, 0.2)';
+                            }
+                        });
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting form:', error);
+                statusDiv.innerHTML = '<div class="status-message error">❌ Network error. Could not connect to the server. Please check your internet connection and try again.</div>';
+            });}
+        );
     </script>
 </body>
 
