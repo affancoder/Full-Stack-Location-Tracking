@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw&callback=initMap"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw"></script>
     <style>
         :root {
             --primary-color: #4f46e5;
@@ -375,6 +375,37 @@
             overflow: hidden;
             margin-top: 1.5rem;
             border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1001; /* Ensure it's above other elements */
+        }
+        
+        .table-map-container {
+            height: 120px;
+            width: 150px;
+            border-radius: 0.375rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+        
+        .map-cell {
+            padding: 0.5rem !important;
+            text-align: center;
+        }
+        
+        .no-map-data {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 120px;
+            width: 150px;
+            background-color: #f9fafb;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            border-radius: 0.375rem;
+            border: 1px solid var(--border-color);
+            margin: 0 auto;
         }
 
         .full-width {
@@ -474,6 +505,7 @@
                         <th>Contact</th>
                         <th>Location Status</th>
                         <th>Full Address</th>
+                        <th>Map</th>
                         <th>Submitted At</th>
                         <th>Actions</th>
                     </tr>
@@ -529,36 +561,45 @@
                     // Use the most detailed address available
                     targetElement.innerHTML = results[0].formatted_address;
                 } else {
-                    // If geocoding fails, revert to showing coordinates
-                    targetElement.innerHTML = originalText;
+                    // If geocoding fails, revert to original text
                     console.error('Geocoder failed due to: ' + status);
+                    targetElement.innerHTML = originalText;
                 }
             });
         }
         
         // Google Maps initialization function
         function initMap() {
-            if (currentUserLocation) {
-                const map = new google.maps.Map(document.getElementById('map'), {
-                    center: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
-                    zoom: 15,
-                });
-                const marker = new google.maps.Marker({
-                    position: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
-                    map: map,
-                    title: currentUserLocation.title
-                });
-                const circle = new google.maps.Circle({
-                    strokeColor: '#4f46e5',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 2,
-                    fillColor: '#4f46e5',
-                    fillOpacity: 0.1,
-                    map: map,
-                    center: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
-                    radius: currentUserLocation.accuracy
-                });
+            const mapElement = document.getElementById('map');
+            if (!mapElement) {
+                console.error('Map container not found');
+                return;
             }
+            
+            if (!currentUserLocation) {
+                mapElement.innerHTML = '<div class="no-map-data">No location data available</div>';
+                return;
+            }
+            
+            const map = new google.maps.Map(mapElement, {
+                center: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
+                zoom: 15,
+            });
+            const marker = new google.maps.Marker({
+                position: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
+                map: map,
+                title: currentUserLocation.title
+            });
+            const circle = new google.maps.Circle({
+                strokeColor: '#4f46e5',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#4f46e5',
+                fillOpacity: 0.1,
+                map: map,
+                center: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
+                radius: currentUserLocation.accuracy
+            });
         }
 
         // DOM elements
@@ -699,9 +740,8 @@
                 if (user.exactLocationData && user.exactLocationData.fullAddress) {
                     addressText.textContent = user.exactLocationData.fullAddress;
                 } else if (user.location) {
-                    // If we only have coordinates, show them and initiate geocoding
+                    // Always convert coordinates to address using Google Maps Geocoding API
                     addressText.textContent = `Coordinates: ${user.location.latitude.toFixed(6)}, ${user.location.longitude.toFixed(6)}`;
-                    // Convert coordinates to address using Google Maps Geocoding API
                     convertCoordinatesToAddress(user.location.latitude, user.location.longitude, addressText);
                 } else {
                     addressText.textContent = 'No location data available';
@@ -717,6 +757,48 @@
                 addressCell.appendChild(viewButton);
                 
                 row.appendChild(addressCell);
+                
+                // Map column
+                const mapCell = document.createElement('td');
+                mapCell.className = 'map-cell';
+                if (user.location) {
+                    const mapContainer = document.createElement('div');
+                    mapContainer.className = 'table-map-container';
+                    mapContainer.id = `map-${user._id}`;
+                    mapCell.appendChild(mapContainer);
+                    
+                    // Initialize the map after the row is added to the DOM
+                    setTimeout(() => {
+                        const mapElement = document.getElementById(`map-${user._id}`);
+                        if (mapElement) {
+                            const map = new google.maps.Map(mapElement, {
+                                center: { lat: user.location.latitude, lng: user.location.longitude },
+                                zoom: 15,
+                                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                                disableDefaultUI: true,
+                                zoomControl: true,
+                                scrollwheel: false,
+                                mapTypeControl: false,
+                                streetViewControl: false,
+                                rotateControl: false,
+                                fullscreenControl: false
+                            });
+                            
+                            // Add a marker for the user's location
+                            new google.maps.Marker({
+                                position: { lat: user.location.latitude, lng: user.location.longitude },
+                                map: map,
+                                title: `${user.firstName} ${user.lastName}`
+                            });
+                        }
+                    }, 100);
+                } else {
+                    const noMapData = document.createElement('div');
+                    noMapData.className = 'no-map-data';
+                    noMapData.textContent = 'No location data';
+                    mapCell.appendChild(noMapData);
+                }
+                row.appendChild(mapCell);
                 
                 // Submitted at column
                 const submittedAtCell = document.createElement('td');
@@ -754,10 +836,11 @@
                 currentUserLocation = null;
             }
             
-            // After the modal is displayed, convert coordinates to address if needed
+            // After the modal is displayed, always convert coordinates to address if location exists
             setTimeout(() => {
                 const modalFullAddress = document.getElementById('modalFullAddress');
-                if (modalFullAddress && user.location && (!user.exactLocationData || !user.exactLocationData.fullAddress)) {
+                if (modalFullAddress && user.location) {
+                    // Always convert coordinates to address regardless of whether exactLocationData exists
                     convertCoordinatesToAddress(user.location.latitude, user.location.longitude, modalFullAddress);
                 }
             }, 100);
@@ -791,11 +874,9 @@
                     <div class="detail-group full-width">
                         <div class="detail-label">Full Address</div>
                         <div class="detail-value" id="modalFullAddress">
-                            ${user.exactLocationData && user.exactLocationData.fullAddress ? 
-                                user.exactLocationData.fullAddress : 
-                                user.location ? 
-                                    `Coordinates: ${user.location.latitude.toFixed(6)}, ${user.location.longitude.toFixed(6)}` : 
-                                    'No location data available'}
+                            ${user.location ? 
+                                `Coordinates: ${user.location.latitude.toFixed(6)}, ${user.location.longitude.toFixed(6)}` : 
+                                'No location data available'}
                         </div>
                     </div>
                     ${user.location ? `
@@ -826,6 +907,13 @@
                 ` : ''}
             `;
             userModal.style.display = 'flex';
+            
+            // Initialize the map after the modal is displayed
+            if (user.location) {
+                setTimeout(() => {
+                    initMap();
+                }, 100);  // Small delay to ensure the DOM is ready
+            }
         }
 
         // Update pagination controls
