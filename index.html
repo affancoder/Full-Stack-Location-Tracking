@@ -226,18 +226,10 @@
                 if (location) {
                     statusDiv.innerHTML = '<div class="status-message success">✅ Location captured! Submitting form...</div>';
                     
-                    // Set the specific address for this submission
-                    const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
+                    // Get exact location details using Google API
+                    getExactLocationDetails(location.latitude, location.longitude);
                     
-                    // Update the exactLocationData with the specific address
-                    exactLocationData = {
-                        fullAddress: specificAddress,
-                        placeId: "ChIJxbdpN9B3AjoRqiOWLzwYvQc",
-                        components: [],
-                        types: []
-                    };
-                    
-                    // Submit the form with location data and specific address
+                    // Submit the form with location data
                     const result = await submitFormData(location);
                     
                     if (result.success) {
@@ -340,28 +332,15 @@
             // Show the location display
             document.getElementById('locationDisplay').style.display = 'block';
             
-            // Display the specific address directly
-            const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
-            document.getElementById('approximateAddress').textContent = specificAddress;
+            // Display initial address message
+            document.getElementById('approximateAddress').textContent = 'Getting your exact address...';
             
-            // Display city information
+            // Display initial city information message
             const cityDiv = document.getElementById('cityDetails');
-            cityDiv.innerHTML = `
-                <strong>City/Town:</strong> Kolkata<br>
-                <strong>Area/Locality:</strong> Kankinara, Jagatdal<br>
-                <strong>District:</strong> Bhatpara<br>
-                <strong>State:</strong> West Bengal<br>
-                <strong>Country:</strong> India<br>
-                <strong>PIN Code:</strong> 743126
-            `;
+            cityDiv.innerHTML = 'Retrieving location details...';
             
-            // Set the exactLocationData for form submission
-            window.exactLocationData = exactLocationData = {
-                fullAddress: specificAddress,
-                placeId: "ChIJxbdpN9B3AjoRqiOWLzwYvQc",
-                components: [],
-                types: []
-            };
+            // Get exact location details using Google API
+            getExactLocationDetails(location.latitude, location.longitude);
         }
 
         function getExactLocationDetails(lat, lng) {
@@ -618,19 +597,40 @@
                     ? addressElement.textContent 
                     : null;
                 
-                // Always use the specific address for all form submissions
-                const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
-                data.exactLocationData = {
-                    fullAddress: specificAddress,
-                    placeId: "ChIJxbdpN9B3AjoRqiOWLzwYvQc",
-                    components: [],
-                    types: [],
-                    coordinates: {
-                        latitude: locationData.latitude,
-                        longitude: locationData.longitude
+                // Use exactLocationData if available from Google API, otherwise use displayed address or coordinates
+                if (window.exactLocationData) {
+                    data.exactLocationData = window.exactLocationData;
+                    // Ensure coordinates are included
+                    if (!data.exactLocationData.coordinates) {
+                        data.exactLocationData.coordinates = {
+                            latitude: locationData.latitude,
+                            longitude: locationData.longitude
+                        };
                     }
-                };
-                console.log('Including specific address for all submissions:', data.exactLocationData);
+                } else if (displayedAddress) {
+                    data.exactLocationData = {
+                        fullAddress: displayedAddress,
+                        placeId: null,
+                        components: [],
+                        types: [],
+                        coordinates: {
+                            latitude: locationData.latitude,
+                            longitude: locationData.longitude
+                        }
+                    };
+                } else {
+                    data.exactLocationData = {
+                        fullAddress: `Coordinates: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`,
+                        placeId: null,
+                        components: [],
+                        types: [],
+                        coordinates: {
+                            latitude: locationData.latitude,
+                            longitude: locationData.longitude
+                        }
+                    };
+                }
+                console.log('Including location data for submission:', data.exactLocationData);
                 data.locationCaptured = true;
             } else {
                 data.locationCaptured = false;
