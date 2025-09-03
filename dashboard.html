@@ -515,6 +515,27 @@
         const itemsPerPage = 10;
         let currentUserLocation = null;
         
+        // Function to convert coordinates to address using Google Maps Geocoding API
+        function convertCoordinatesToAddress(latitude, longitude, targetElement) {
+            // Show loading indicator
+            const originalText = targetElement.innerHTML;
+            targetElement.innerHTML = 'Converting coordinates to address...';
+            
+            const geocoder = new google.maps.Geocoder();
+            const latlng = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
+            
+            geocoder.geocode({ 'location': latlng }, function(results, status) {
+                if (status === 'OK' && results[0]) {
+                    // Use the most detailed address available
+                    targetElement.innerHTML = results[0].formatted_address;
+                } else {
+                    // If geocoding fails, revert to showing coordinates
+                    targetElement.innerHTML = originalText;
+                    console.error('Geocoder failed due to: ' + status);
+                }
+            });
+        }
+        
         // Google Maps initialization function
         function initMap() {
             if (currentUserLocation) {
@@ -670,9 +691,31 @@
                 // Full address column
                 const addressCell = document.createElement('td');
                 addressCell.className = 'address-cell';
-                // Display the specific address requested by the user
-                const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
-                addressCell.textContent = specificAddress;
+                // Create a div for the address text
+                const addressText = document.createElement('div');
+                addressText.className = 'address-text';
+                addressText.id = `address-${user._id}`;
+                // Display the full address from exactLocationData if available, otherwise convert coordinates to address
+                if (user.exactLocationData && user.exactLocationData.fullAddress) {
+                    addressText.textContent = user.exactLocationData.fullAddress;
+                } else if (user.location) {
+                    // If we only have coordinates, show them and initiate geocoding
+                    addressText.textContent = `Coordinates: ${user.location.latitude.toFixed(6)}, ${user.location.longitude.toFixed(6)}`;
+                    // Convert coordinates to address using Google Maps Geocoding API
+                    convertCoordinatesToAddress(user.location.latitude, user.location.longitude, addressText);
+                } else {
+                    addressText.textContent = 'No location data available';
+                }
+                addressCell.appendChild(addressText);
+                
+                // Add view details button
+                const viewButton = document.createElement('button');
+                viewButton.className = 'view-details-btn';
+                viewButton.textContent = 'View Details';
+                viewButton.dataset.userId = user._id;
+                viewButton.addEventListener('click', () => showUserDetails(user));
+                addressCell.appendChild(viewButton);
+                
                 row.appendChild(addressCell);
                 
                 // Submitted at column
@@ -682,11 +725,11 @@
                 
                 // Actions column
                 const actionsCell = document.createElement('td');
-                const viewButton = document.createElement('button');
-                viewButton.className = 'pagination-btn';
-                viewButton.textContent = 'View Details';
-                viewButton.addEventListener('click', () => showUserDetails(user));
-                actionsCell.appendChild(viewButton);
+                const actionButton = document.createElement('button');
+                actionButton.className = 'pagination-btn';
+                actionButton.textContent = 'View Details';
+                actionButton.addEventListener('click', () => showUserDetails(user));
+                actionsCell.appendChild(actionButton);
                 row.appendChild(actionsCell);
                 
                 usersTableBody.appendChild(row);
@@ -710,6 +753,14 @@
             } else {
                 currentUserLocation = null;
             }
+            
+            // After the modal is displayed, convert coordinates to address if needed
+            setTimeout(() => {
+                const modalFullAddress = document.getElementById('modalFullAddress');
+                if (modalFullAddress && user.location && (!user.exactLocationData || !user.exactLocationData.fullAddress)) {
+                    convertCoordinatesToAddress(user.location.latitude, user.location.longitude, modalFullAddress);
+                }
+            }, 100);
             
             modalBody.innerHTML = `
                 <div class="user-detail-grid">
@@ -739,7 +790,13 @@
                     </div>
                     <div class="detail-group full-width">
                         <div class="detail-label">Full Address</div>
-                        <div class="detail-value">V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India</div>
+                        <div class="detail-value" id="modalFullAddress">
+                            ${user.exactLocationData && user.exactLocationData.fullAddress ? 
+                                user.exactLocationData.fullAddress : 
+                                user.location ? 
+                                    `Coordinates: ${user.location.latitude.toFixed(6)}, ${user.location.longitude.toFixed(6)}` : 
+                                    'No location data available'}
+                        </div>
                     </div>
                     ${user.location ? `
                         <div class="detail-group">
@@ -858,6 +915,43 @@
         function showError(message) {
             errorContainer.style.display = 'block';
             errorMessage.textContent = message;
+        }
+
+        // Function to convert coordinates to address using Google Maps Geocoding API
+        function convertCoordinatesToAddress(latitude, longitude, addressElement) {
+            // Use the same API key that's already being used for the map
+            const apiKey = 'AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw';
+            const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
+            
+            // Show loading indicator in the address cell
+            const originalText = addressElement.textContent;
+            addressElement.textContent = 'Converting coordinates to address...';
+            
+            fetch(geocodingUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'OK' && data.results && data.results.length > 0) {
+                        // Get the most detailed result (usually the first one)
+                        const formattedAddress = data.results[0].formatted_address;
+                        addressElement.textContent = formattedAddress;
+                        
+                        // If we have a user ID, we could update the database with this address
+                        // This would require an additional API endpoint on the server
+                        if (addressElement.dataset.userId) {
+                            console.log(`Address found for user ${addressElement.dataset.userId}: ${formattedAddress}`);
+                            // Optionally update the database with this address
+                        }
+                    } else {
+                        // If geocoding fails, revert to showing coordinates
+                        addressElement.textContent = originalText;
+                        console.error('Geocoding failed:', data.status);
+                    }
+                })
+                .catch(error => {
+                    // If there's an error, revert to showing coordinates
+                    addressElement.textContent = originalText;
+                    console.error('Error converting coordinates to address:', error);
+                });
         }
     </script>
 </body>
