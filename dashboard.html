@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Location Dashboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>">
+    <!-- Modern font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw&callback=initMap"></script>
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --secondary-color: #f9fafb;
+            --border-color: #e5e7eb;
+            --text-color: #111827;
+            --text-light: #6b7280;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f3f4f6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .refresh-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stat-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .users-table-container {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input {
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            width: 250px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .users-table th {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            background-color: var(--secondary-color);
+        }
+
+        .users-table tbody tr:hover {
+            background-color: #f9fafb;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-email {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .location-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .location-captured {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .location-missing {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        .address-cell {
+            max-width: 300px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .pagination-info {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .pagination-btn {
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .pagination-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .pagination-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-container {
+            background-color: #fee2e2;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-description {
+            color: var(--text-light);
+            max-width: 400px;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .user-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            word-break: break-word;
+        }
+
+        .map-container {
+            height: 300px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin-top: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .search-input {
+                width: 100%;
+            }
+
+            .users-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .user-detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">User Location Dashboard</h1>
+            <button id="refreshBtn" class="refresh-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
+                </svg>
+                Refresh Data
+            </button>
+        </div>
+
+        <div id="errorContainer" class="error-container" style="display: none;">
+            <p id="errorMessage">An error occurred while fetching data.</p>
+        </div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-title">Total Users</div>
+                <div id="totalUsers" class="stat-value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Users with Location</div>
+                <div id="usersWithLocation" class="stat-value">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Users without Location</div>
+                <div id="usersWithoutLocation" class="stat-value">-</div>
+            </div>
+        </div>
+
+        <div class="users-table-container">
+            <div class="table-header">
+                <h2 class="table-title">User Details</h2>
+                <div class="search-container">
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                    </svg>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search users...">
+                </div>
+            </div>
+
+            <div id="loadingContainer" class="loading-container">
+                <div class="loading-spinner"></div>
+            </div>
+
+            <div id="emptyState" class="empty-state" style="display: none;">
+                <div class="empty-icon">📝</div>
+                <h3 class="empty-title">No users found</h3>
+                <p class="empty-description">There are no users in the database yet. Users will appear here once they submit the form.</p>
+            </div>
+
+            <table id="usersTable" class="users-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th>Location Status</th>
+                        <th>Full Address</th>
+                        <th>Submitted At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <!-- User rows will be inserted here -->
+                </tbody>
+            </table>
+
+            <div id="pagination" class="pagination" style="display: none;">
+                <div class="pagination-info">
+                    Showing <span id="startRange">1</span> to <span id="endRange">10</span> of <span id="totalItems">0</span> users
+                </div>
+                <div class="pagination-controls" id="paginationControls">
+                    <!-- Pagination buttons will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Details Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">User Details</h2>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- User details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let allUsers = [];
+        let filteredUsers = [];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let currentUserLocation = null;
+        
+        // Google Maps initialization function
+        function initMap() {
+            if (currentUserLocation) {
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
+                    zoom: 15,
+                });
+                const marker = new google.maps.Marker({
+                    position: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
+                    map: map,
+                    title: currentUserLocation.title
+                });
+                const circle = new google.maps.Circle({
+                    strokeColor: '#4f46e5',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#4f46e5',
+                    fillOpacity: 0.1,
+                    map: map,
+                    center: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
+                    radius: currentUserLocation.accuracy
+                });
+            }
+        }
+
+        // DOM elements
+        const loadingContainer = document.getElementById('loadingContainer');
+        const usersTable = document.getElementById('usersTable');
+        const usersTableBody = document.getElementById('usersTableBody');
+        const emptyState = document.getElementById('emptyState');
+        const errorContainer = document.getElementById('errorContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const pagination = document.getElementById('pagination');
+        const paginationControls = document.getElementById('paginationControls');
+        const totalUsersElement = document.getElementById('totalUsers');
+        const usersWithLocationElement = document.getElementById('usersWithLocation');
+        const usersWithoutLocationElement = document.getElementById('usersWithoutLocation');
+        const searchInput = document.getElementById('searchInput');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const userModal = document.getElementById('userModal');
+        const closeModal = document.getElementById('closeModal');
+        const modalBody = document.getElementById('modalBody');
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchUsers();
+            setupEventListeners();
+        });
+
+        // Set up event listeners
+        function setupEventListeners() {
+            refreshBtn.addEventListener('click', fetchUsers);
+            searchInput.addEventListener('input', handleSearch);
+            closeModal.addEventListener('click', () => userModal.style.display = 'none');
+            window.addEventListener('click', (event) => {
+                if (event.target === userModal) {
+                    userModal.style.display = 'none';
+                }
+            });
+        }
+
+        // Fetch users from the API
+        async function fetchUsers() {
+            showLoading();
+            try {
+                const response = await fetch('/api/users');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                if (data.success) {
+                    allUsers = data.data;
+                    filteredUsers = [...allUsers];
+                    updateStats();
+                    renderUsers();
+                } else {
+                    throw new Error(data.message || 'Failed to fetch users');
+                }
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                showError(error.message);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalUsers = allUsers.length;
+            const usersWithLocation = allUsers.filter(user => user.locationCaptured).length;
+            const usersWithoutLocation = totalUsers - usersWithLocation;
+
+            totalUsersElement.textContent = totalUsers;
+            usersWithLocationElement.textContent = usersWithLocation;
+            usersWithoutLocationElement.textContent = usersWithoutLocation;
+        }
+
+        // Handle search functionality
+        function handleSearch() {
+            const searchTerm = searchInput.value.toLowerCase();
+            filteredUsers = allUsers.filter(user => {
+                const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+                const email = user.email.toLowerCase();
+                const address = user.exactLocationData?.fullAddress?.toLowerCase() || '';
+                return fullName.includes(searchTerm) || 
+                       email.includes(searchTerm) || 
+                       address.includes(searchTerm);
+            });
+            currentPage = 1;
+            renderUsers();
+        }
+
+        // Render users table
+        function renderUsers() {
+            if (filteredUsers.length === 0) {
+                showEmptyState();
+                return;
+            }
+
+            hideEmptyState();
+            usersTableBody.innerHTML = '';
+            
+            // Calculate pagination
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, filteredUsers.length);
+            const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+            // Render user rows
+            paginatedUsers.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Name column
+                const nameCell = document.createElement('td');
+                nameCell.innerHTML = `
+                    <div class="user-name">${user.firstName} ${user.lastName}</div>
+                    <div class="user-email">${user.email}</div>
+                `;
+                row.appendChild(nameCell);
+                
+                // Contact column
+                const contactCell = document.createElement('td');
+                contactCell.textContent = user.phone || 'N/A';
+                row.appendChild(contactCell);
+                
+                // Location status column
+                const locationStatusCell = document.createElement('td');
+                const locationBadge = document.createElement('span');
+                locationBadge.className = `location-badge ${user.locationCaptured ? 'location-captured' : 'location-missing'}`;
+                locationBadge.textContent = user.locationCaptured ? 'Captured' : 'Missing';
+                locationStatusCell.appendChild(locationBadge);
+                row.appendChild(locationStatusCell);
+                
+                // Full address column
+                const addressCell = document.createElement('td');
+                addressCell.className = 'address-cell';
+                // Display the specific address requested by the user
+                const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
+                addressCell.textContent = specificAddress;
+                row.appendChild(addressCell);
+                
+                // Submitted at column
+                const submittedAtCell = document.createElement('td');
+                submittedAtCell.textContent = new Date(user.submittedAt).toLocaleString();
+                row.appendChild(submittedAtCell);
+                
+                // Actions column
+                const actionsCell = document.createElement('td');
+                const viewButton = document.createElement('button');
+                viewButton.className = 'pagination-btn';
+                viewButton.textContent = 'View Details';
+                viewButton.addEventListener('click', () => showUserDetails(user));
+                actionsCell.appendChild(viewButton);
+                row.appendChild(actionsCell);
+                
+                usersTableBody.appendChild(row);
+            });
+
+            // Update pagination
+            updatePagination();
+            usersTable.style.display = 'table';
+        }
+
+        // Show user details in modal
+        function showUserDetails(user) {
+            // Set current user location for map initialization
+            if (user.location) {
+                currentUserLocation = {
+                    latitude: user.location.latitude,
+                    longitude: user.location.longitude,
+                    accuracy: user.location.accuracy,
+                    title: `${user.firstName} ${user.lastName}`
+                };
+            } else {
+                currentUserLocation = null;
+            }
+            
+            modalBody.innerHTML = `
+                <div class="user-detail-grid">
+                    <div class="detail-group">
+                        <div class="detail-label">First Name</div>
+                        <div class="detail-value">${user.firstName}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Last Name</div>
+                        <div class="detail-value">${user.lastName}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value">${user.email}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Phone</div>
+                        <div class="detail-value">${user.phone || 'N/A'}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Age</div>
+                        <div class="detail-value">${user.age || 'N/A'}</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Gender</div>
+                        <div class="detail-value">${user.gender || 'N/A'}</div>
+                    </div>
+                    <div class="detail-group full-width">
+                        <div class="detail-label">Full Address</div>
+                        <div class="detail-value">V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India</div>
+                    </div>
+                    ${user.location ? `
+                        <div class="detail-group">
+                            <div class="detail-label">Latitude</div>
+                            <div class="detail-value">${user.location.latitude}</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">Longitude</div>
+                            <div class="detail-value">${user.location.longitude}</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">Accuracy</div>
+                            <div class="detail-value">±${Math.round(user.location.accuracy)} meters</div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="detail-label">Timestamp</div>
+                            <div class="detail-value">${new Date(user.location.timestamp).toLocaleString()}</div>
+                        </div>
+                    ` : ''}
+                    <div class="detail-group full-width">
+                        <div class="detail-label">Submitted At</div>
+                        <div class="detail-value">${new Date(user.submittedAt).toLocaleString()}</div>
+                    </div>
+                </div>
+                ${user.location ? `
+                    <div class="map-container" id="map"></div>
+                ` : ''}
+            `;
+            userModal.style.display = 'flex';
+        }
+
+        // Update pagination controls
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+            const startRange = (currentPage - 1) * itemsPerPage + 1;
+            const endRange = Math.min(startRange + itemsPerPage - 1, filteredUsers.length);
+            
+            document.getElementById('startRange').textContent = startRange;
+            document.getElementById('endRange').textContent = endRange;
+            document.getElementById('totalItems').textContent = filteredUsers.length;
+            
+            paginationControls.innerHTML = '';
+            
+            // Previous button
+            const prevButton = document.createElement('button');
+            prevButton.className = 'pagination-btn';
+            prevButton.textContent = 'Previous';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderUsers();
+                }
+            });
+            paginationControls.appendChild(prevButton);
+            
+            // Page buttons
+            const maxButtons = 5;
+            const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+            const endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                pageButton.textContent = i;
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderUsers();
+                });
+                paginationControls.appendChild(pageButton);
+            }
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.className = 'pagination-btn';
+            nextButton.textContent = 'Next';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderUsers();
+                }
+            });
+            paginationControls.appendChild(nextButton);
+            
+            pagination.style.display = totalPages > 1 ? 'flex' : 'none';
+        }
+
+        // Show loading state
+        function showLoading() {
+            loadingContainer.style.display = 'flex';
+            usersTable.style.display = 'none';
+            emptyState.style.display = 'none';
+            errorContainer.style.display = 'none';
+            pagination.style.display = 'none';
+        }
+
+        // Hide loading state
+        function hideLoading() {
+            loadingContainer.style.display = 'none';
+        }
+
+        // Show empty state
+        function showEmptyState() {
+            emptyState.style.display = 'flex';
+            usersTable.style.display = 'none';
+            pagination.style.display = 'none';
+        }
+
+        // Hide empty state
+        function hideEmptyState() {
+            emptyState.style.display = 'none';
+        }
+
+        // Show error message
+        function showError(message) {
+            errorContainer.style.display = 'block';
+            errorMessage.textContent = message;
+        }
+    </script>
+</body>
+
+</html>

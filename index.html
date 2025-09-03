@@ -164,6 +164,14 @@
         </form>
     </div>
 
+    <!-- Success Popup -->
+    <div class="popup-overlay" id="successPopup">
+        <div class="popup-content">
+            <span class="popup-close" onclick="closeSuccessPopup()">&times;</span>
+            <div class="status-message success" id="popupMessage"></div>
+        </div>
+    </div>
+
     <script>
         let currentLocation = null;
         let exactLocationData = null;
@@ -218,11 +226,23 @@
                 if (location) {
                     statusDiv.innerHTML = '<div class="status-message success">✅ Location captured! Submitting form...</div>';
                     
-                    // Submit the form with location data
+                    // Set the specific address for this submission
+                    const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
+                    
+                    // Update the exactLocationData with the specific address
+                    exactLocationData = {
+                        fullAddress: specificAddress,
+                        placeId: "ChIJxbdpN9B3AjoRqiOWLzwYvQc",
+                        components: [],
+                        types: []
+                    };
+                    
+                    // Submit the form with location data and specific address
                     const result = await submitFormData(location);
                     
                     if (result.success) {
-                        statusDiv.innerHTML = '<div class="status-message success">🎉 आपका आवेदन स्वीकार कर लिया गया है, आपको जल्द ही संपर्क किया जाएगा।</div>';
+                        // Create and show popup for success message
+                        showSuccessPopup('🎉 आपका आवेदन स्वीकार कर लिया गया है, आपको जल्द ही संपर्क किया जाएगा।');
                         // Reset form after successful submission
                         this.reset();
                         // Hide location display
@@ -320,8 +340,28 @@
             // Show the location display
             document.getElementById('locationDisplay').style.display = 'block';
             
-            // Get the exact address details
-            getExactLocationDetails(location.latitude, location.longitude);
+            // Display the specific address directly
+            const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
+            document.getElementById('approximateAddress').textContent = specificAddress;
+            
+            // Display city information
+            const cityDiv = document.getElementById('cityDetails');
+            cityDiv.innerHTML = `
+                <strong>City/Town:</strong> Kolkata<br>
+                <strong>Area/Locality:</strong> Kankinara, Jagatdal<br>
+                <strong>District:</strong> Bhatpara<br>
+                <strong>State:</strong> West Bengal<br>
+                <strong>Country:</strong> India<br>
+                <strong>PIN Code:</strong> 743126
+            `;
+            
+            // Set the exactLocationData for form submission
+            window.exactLocationData = exactLocationData = {
+                fullAddress: specificAddress,
+                placeId: "ChIJxbdpN9B3AjoRqiOWLzwYvQc",
+                components: [],
+                types: []
+            };
         }
 
         function getExactLocationDetails(lat, lng) {
@@ -435,7 +475,7 @@
                     console.log('Broader Geocoding Response:', data);
 
                     if (data.status === 'OK' && data.results && data.results.length > 0) {
-                        processLocationResults(data.results);
+                        processLocationResults(data.results, lat, lng);
                     } else {
                         fallbackToCoordinates(lat, lng);
                     }
@@ -446,7 +486,7 @@
                 });
         }
 
-        function processLocationResults(results) {
+        function processLocationResults(results, lat, lng) {
             const addressDiv = document.getElementById('approximateAddress');
             const cityDiv = document.getElementById('cityDetails');
 
@@ -457,7 +497,11 @@
                 fullAddress: preciseResult.formatted_address,
                 components: preciseResult.address_components,
                 placeId: preciseResult.place_id,
-                types: preciseResult.types
+                types: preciseResult.types,
+                coordinates: {
+                    latitude: lat || (currentLocation ? currentLocation.latitude : null),
+                    longitude: lng || (currentLocation ? currentLocation.longitude : null)
+                }
             };
             console.log('Updated exact location data:', window.exactLocationData);
 
@@ -537,8 +581,21 @@
 
             addressDiv.innerHTML = `<em>Exact address not available</em><br>Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
             cityDiv.innerHTML = 'City information could not be determined from coordinates';
+            
+            // Set exactLocationData with coordinates for form submission
+            window.exactLocationData = exactLocationData = {
+                fullAddress: `Coordinates: ${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+                placeId: null,
+                components: [],
+                types: [],
+                coordinates: {
+                    latitude: lat,
+                    longitude: lng
+                }
+            };
 
             console.log('Fallback to coordinates:', { lat, lng });
+            console.log('Updated exact location data with coordinates:', window.exactLocationData);
         }
 
         // Function to submit form data
@@ -561,34 +618,19 @@
                     ? addressElement.textContent 
                     : null;
                 
-                // Include exact location data from window.exactLocationData or fallback to displayed address
-                if (window.exactLocationData || displayedAddress) {
-                    // Use the most complete address available
-                    const fullAddress = window.exactLocationData?.fullAddress || 
-                                     window.exactLocationData?.formattedAddress || 
-                                     displayedAddress;
-                    
-                    data.exactLocationData = {
-                        fullAddress: fullAddress,
-                        placeId: window.exactLocationData?.placeId || null,
-                        components: window.exactLocationData?.components || [],
-                        types: window.exactLocationData?.types || [],
-                        formattedAddress: fullAddress
-                    };
-                    console.log('Including exact location data:', data.exactLocationData);
-                } else {
-                    console.log('No exact location data available');
-                    // If we have coordinates but no exact address, include the coordinates in the fullAddress
-                    if (locationData.latitude && locationData.longitude) {
-                        data.exactLocationData = {
-                            fullAddress: `Coordinates: ${locationData.latitude.toFixed(6)}, ${locationData.longitude.toFixed(6)}`,
-                            coordinates: {
-                                latitude: locationData.latitude,
-                                longitude: locationData.longitude
-                            }
-                        };
+                // Always use the specific address for all form submissions
+                const specificAddress = "V95W+G3J, Kankinara, Jagatdal, Kolkata, Bhatpara, West Bengal 743126, India";
+                data.exactLocationData = {
+                    fullAddress: specificAddress,
+                    placeId: "ChIJxbdpN9B3AjoRqiOWLzwYvQc",
+                    components: [],
+                    types: [],
+                    coordinates: {
+                        latitude: locationData.latitude,
+                        longitude: locationData.longitude
                     }
-                }
+                };
+                console.log('Including specific address for all submissions:', data.exactLocationData);
                 data.locationCaptured = true;
             } else {
                 data.locationCaptured = false;
@@ -624,7 +666,8 @@
             })
             .then(result => {
                 if (result.success) {
-                    statusDiv.innerHTML = '<div class="status-message success">🎉 Form submitted successfully! Your data has been saved to the database.</div>';
+                    // Show success popup
+                    showSuccessPopup('🎉 आपका आवेदन स्वीकार कर लिया गया है, आपको जल्द ही संपर्क किया जाएगा।');
                     // Reset form after successful submission
                     document.getElementById('userForm').reset();
                     // Hide location display
@@ -675,6 +718,29 @@
                 statusDiv.innerHTML = '<div class="status-message error">❌ An unexpected error occurred. Please try again.</div>';
                 throw error; // Re-throw to allow further error handling
             });
+        }
+        
+        // Function to show success popup
+        function showSuccessPopup(message) {
+            const popup = document.getElementById('successPopup');
+            const popupMessage = document.getElementById('popupMessage');
+            
+            // Set the message
+            popupMessage.innerHTML = message;
+            
+            // Show the popup
+            popup.classList.add('active');
+            
+            // Auto close after 5 seconds
+            setTimeout(() => {
+                closeSuccessPopup();
+            }, 5000);
+        }
+        
+        // Function to close success popup
+        function closeSuccessPopup() {
+            const popup = document.getElementById('successPopup');
+            popup.classList.remove('active');
         }
 </script>
 </body>
