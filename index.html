@@ -234,7 +234,7 @@
                 });
 
                 if (location) {
-                    statusDiv.innerHTML = '<div class="status-message success">✅ Location captured! Submitting form...</div>';
+                    statusDiv.innerHTML = '<div class="status-message success">✅ Form Submitted Successfully | फ़ॉर्म सफलतापूर्वक जमा हो गया</div>';
                     
                     // Get exact location details using Google API
                     getExactLocationDetails(location.latitude, location.longitude);
@@ -654,7 +654,7 @@
 
             // Show loading message
             const statusDiv = document.getElementById('locationStatus');
-            statusDiv.innerHTML = '<div class="status-message loading">🔄 Submitting form data to database...</div>';
+            // statusDiv.innerHTML = '<div class="status-message loading">🔄 Submitting form data to database...</div>';
             
             // Show loading popup
             showLoadingPopup('Please wait, form submitting...');
