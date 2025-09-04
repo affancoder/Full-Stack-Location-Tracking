@@ -1,0 +1,4 @@
+/api/*  /.netlify/functions/api/:splat  200
+/dashboard  /dashboard.html  200
+/style.css  /public/style.css  200
+/*  /index.html  200

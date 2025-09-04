@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/public/style.css">
+    <link rel="stylesheet" href="./style.css">
 </head>
 
 <body>
@@ -171,6 +171,13 @@
             <div class="status-message success" id="popupMessage"></div>
         </div>
     </div>
+    
+    <!-- Loading Popup -->
+    <div class="popup-overlay" id="loadingPopup">
+        <div class="popup-content">
+            <div class="status-message loading" id="loadingMessage">Please wait, form submitting...</div>
+        </div>
+    </div>
 
     <script>
         let currentLocation = null;
@@ -195,6 +202,9 @@
             
             // Show loading message
             statusDiv.innerHTML = '<div class="status-message loading">🔍 Getting your precise location (this may take 10-15 seconds)...</div>';
+            
+            // Show loading popup
+            showLoadingPopup('Please wait, getting your location...');
             
             try {
                 // Start the refined location capture
@@ -253,6 +263,9 @@
                 submitBtn.disabled = false;
                 submitBtn.textContent = originalBtnText;
                 submitBtn.style.background = '';
+                
+                // Hide loading popup if it's still visible (in case of errors)
+                hideLoadingPopup();
             }
         });
 
@@ -642,6 +655,9 @@
             // Show loading message
             const statusDiv = document.getElementById('locationStatus');
             statusDiv.innerHTML = '<div class="status-message loading">🔄 Submitting form data to database...</div>';
+            
+            // Show loading popup
+            showLoadingPopup('Please wait, form submitting...');
 
             // Send data to MongoDB through our server API
             return fetch('/api/submit-form', {
@@ -700,6 +716,9 @@
                     console.error('Form submission error:', result);
                     statusDiv.innerHTML = `<div class="status-message error">❌ Error: ${errorMessage}</div>`;
                     
+                    // Hide loading popup
+                    hideLoadingPopup();
+                    
                     // Highlight missing fields if applicable
                     if (result.missingFields) {
                         result.missingFields.forEach(field => {
@@ -716,6 +735,8 @@
             .catch(error => {
                 console.error('Error in form submission:', error);
                 statusDiv.innerHTML = '<div class="status-message error">❌ An unexpected error occurred. Please try again.</div>';
+                // Hide loading popup
+                hideLoadingPopup();
                 throw error; // Re-throw to allow further error handling
             });
         }
@@ -724,6 +745,9 @@
         function showSuccessPopup(message) {
             const popup = document.getElementById('successPopup');
             const popupMessage = document.getElementById('popupMessage');
+            
+            // Hide loading popup if it's visible
+            hideLoadingPopup();
             
             // Set the message
             popupMessage.innerHTML = message;
@@ -740,6 +764,24 @@
         // Function to close success popup
         function closeSuccessPopup() {
             const popup = document.getElementById('successPopup');
+            popup.classList.remove('active');
+        }
+        
+        // Function to show loading popup
+        function showLoadingPopup(message = 'Please wait, form submitting...') {
+            const popup = document.getElementById('loadingPopup');
+            const loadingMessage = document.getElementById('loadingMessage');
+            
+            // Set the message
+            loadingMessage.innerHTML = message;
+            
+            // Show the popup
+            popup.classList.add('active');
+        }
+        
+        // Function to hide loading popup
+        function hideLoadingPopup() {
+            const popup = document.getElementById('loadingPopup');
             popup.classList.remove('active');
         }
 </script>

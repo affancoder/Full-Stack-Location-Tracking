@@ -25,6 +25,27 @@ A full-stack web application for capturing, storing, and managing user location 
 - 📋 User details modal with map view
 - 📱 Touch-friendly interface
 
+## 🚀 Deployment
+
+### Netlify Deployment
+
+1. **Prerequisites**
+   - A Netlify account
+   - MongoDB Atlas account with a cluster set up
+
+2. **Steps to Deploy**
+   - Fork or clone this repository
+   - Connect your GitHub repository to Netlify
+   - Set the following environment variables in Netlify:
+     - `MONGODB_URI`: Your MongoDB connection string
+   - Netlify will automatically detect the configuration from `netlify.toml`
+   - The build will automatically set up the serverless functions
+
+3. **Verify Deployment**
+   - Check that both the main form and dashboard are accessible
+   - Test the location tracking functionality
+   - Verify that form submissions are being saved to the database
+
 ## 🛠️ Technologies Used
 
 ### Frontend

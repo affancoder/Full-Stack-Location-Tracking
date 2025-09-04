@@ -1,3 +1,4 @@
+/* Moved from public/style.css for Vercel root static serving */
 :root {
     --primary: #6c5ce7;
     --primary-2: #a363d9;
@@ -418,3 +419,6 @@ body {
     /* visibility: hidden; */
     display: none;
 }
+
+
+

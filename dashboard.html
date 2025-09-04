@@ -5,12 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Location Dashboard</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📍</text></svg>">
     <!-- Modern font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw"></script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw"></script>
     <style>
         :root {
             --primary-color: #4f46e5;
@@ -376,9 +378,10 @@
             margin-top: 1.5rem;
             border: 1px solid var(--border-color);
             position: relative;
-            z-index: 1001; /* Ensure it's above other elements */
+            z-index: 1001;
+            /* Ensure it's above other elements */
         }
-        
+
         .table-map-container {
             height: 120px;
             width: 150px;
@@ -387,12 +390,12 @@
             border: 1px solid var(--border-color);
             position: relative;
         }
-        
+
         .map-cell {
             padding: 0.5rem !important;
             text-align: center;
         }
-        
+
         .no-map-data {
             display: flex;
             align-items: center;
@@ -443,7 +446,7 @@
                 grid-template-columns: 1fr;
             }
 
-            .users-table-container{
+            .users-table-container {
                 overflow-x: scroll;
             }
         }
@@ -457,7 +460,8 @@
             <button id="refreshBtn" class="refresh-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
-                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
+                    <path
+                        d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z" />
                 </svg>
                 Refresh Data
             </button>
@@ -486,8 +490,10 @@
             <div class="table-header">
                 <h2 class="table-title">User Details</h2>
                 <div class="search-container">
-                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                    <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                        fill="currentColor" viewBox="0 0 16 16">
+                        <path
+                            d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
                     </svg>
                     <input type="text" id="searchInput" class="search-input" placeholder="Search users...">
                 </div>
@@ -500,7 +506,8 @@
             <div id="emptyState" class="empty-state" style="display: none;">
                 <div class="empty-icon">📝</div>
                 <h3 class="empty-title">No users found</h3>
-                <p class="empty-description">There are no users in the database yet. Users will appear here once they submit the form.</p>
+                <p class="empty-description">There are no users in the database yet. Users will appear here once they
+                    submit the form.</p>
             </div>
 
             <table id="usersTable" class="users-table" style="display: none;">
@@ -522,7 +529,8 @@
 
             <div id="pagination" class="pagination" style="display: none;">
                 <div class="pagination-info">
-                    Showing <span id="startRange">1</span> to <span id="endRange">10</span> of <span id="totalItems">0</span> users
+                    Showing <span id="startRange">1</span> to <span id="endRange">10</span> of <span
+                        id="totalItems">0</span> users
                 </div>
                 <div class="pagination-controls" id="paginationControls">
                     <!-- Pagination buttons will be inserted here -->
@@ -551,17 +559,17 @@
         let currentPage = 1;
         const itemsPerPage = 10;
         let currentUserLocation = null;
-        
+
         // Function to convert coordinates to address using Google Maps Geocoding API
         function convertCoordinatesToAddress(latitude, longitude, targetElement) {
             // Show loading indicator
             const originalText = targetElement.innerHTML;
             targetElement.innerHTML = 'Converting coordinates to address...';
-            
+
             const geocoder = new google.maps.Geocoder();
             const latlng = { lat: parseFloat(latitude), lng: parseFloat(longitude) };
-            
-            geocoder.geocode({ 'location': latlng }, function(results, status) {
+
+            geocoder.geocode({ 'location': latlng }, function (results, status) {
                 if (status === 'OK' && results[0]) {
                     // Use the most detailed address available
                     targetElement.innerHTML = results[0].formatted_address;
@@ -572,7 +580,7 @@
                 }
             });
         }
-        
+
         // Google Maps initialization function
         function initMap() {
             const mapElement = document.getElementById('map');
@@ -580,12 +588,12 @@
                 console.error('Map container not found');
                 return;
             }
-            
+
             if (!currentUserLocation) {
                 mapElement.innerHTML = '<div class="no-map-data">No location data available</div>';
                 return;
             }
-            
+
             const map = new google.maps.Map(mapElement, {
                 center: { lat: currentUserLocation.latitude, lng: currentUserLocation.longitude },
                 zoom: 15,
@@ -686,9 +694,9 @@
                 const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
                 const email = user.email.toLowerCase();
                 const address = user.exactLocationData?.fullAddress?.toLowerCase() || '';
-                return fullName.includes(searchTerm) || 
-                       email.includes(searchTerm) || 
-                       address.includes(searchTerm);
+                return fullName.includes(searchTerm) ||
+                    email.includes(searchTerm) ||
+                    address.includes(searchTerm);
             });
             currentPage = 1;
             renderUsers();
@@ -703,7 +711,7 @@
 
             hideEmptyState();
             usersTableBody.innerHTML = '';
-            
+
             // Calculate pagination
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = Math.min(startIndex + itemsPerPage, filteredUsers.length);
@@ -712,7 +720,7 @@
             // Render user rows
             paginatedUsers.forEach(user => {
                 const row = document.createElement('tr');
-                
+
                 // Name column
                 const nameCell = document.createElement('td');
                 nameCell.innerHTML = `
@@ -720,12 +728,12 @@
                     <div class="user-email">${user.email}</div>
                 `;
                 row.appendChild(nameCell);
-                
+
                 // Contact column
                 const contactCell = document.createElement('td');
                 contactCell.textContent = user.phone || 'N/A';
                 row.appendChild(contactCell);
-                
+
                 // Location status column
                 const locationStatusCell = document.createElement('td');
                 const locationBadge = document.createElement('span');
@@ -733,7 +741,7 @@
                 locationBadge.textContent = user.locationCaptured ? 'Captured' : 'Missing';
                 locationStatusCell.appendChild(locationBadge);
                 row.appendChild(locationStatusCell);
-                
+
                 // Full address column
                 const addressCell = document.createElement('td');
                 addressCell.className = 'address-cell';
@@ -752,7 +760,7 @@
                     addressText.textContent = 'No location data available';
                 }
                 addressCell.appendChild(addressText);
-                
+
                 // Add view details button
                 const viewButton = document.createElement('button');
                 viewButton.className = 'view-details-btn';
@@ -760,9 +768,9 @@
                 viewButton.dataset.userId = user._id;
                 viewButton.addEventListener('click', () => showUserDetails(user));
                 addressCell.appendChild(viewButton);
-                
+
                 row.appendChild(addressCell);
-                
+
                 // Map column
                 const mapCell = document.createElement('td');
                 mapCell.className = 'map-cell';
@@ -771,7 +779,7 @@
                     mapContainer.className = 'table-map-container';
                     mapContainer.id = `map-${user._id}`;
                     mapCell.appendChild(mapContainer);
-                    
+
                     // Initialize the map after the row is added to the DOM
                     setTimeout(() => {
                         const mapElement = document.getElementById(`map-${user._id}`);
@@ -788,7 +796,7 @@
                                 rotateControl: false,
                                 fullscreenControl: false
                             });
-                            
+
                             // Add a marker for the user's location
                             new google.maps.Marker({
                                 position: { lat: user.location.latitude, lng: user.location.longitude },
@@ -804,12 +812,12 @@
                     mapCell.appendChild(noMapData);
                 }
                 row.appendChild(mapCell);
-                
+
                 // Submitted at column
                 const submittedAtCell = document.createElement('td');
                 submittedAtCell.textContent = new Date(user.submittedAt).toLocaleString();
                 row.appendChild(submittedAtCell);
-                
+
                 // Actions column
                 const actionsCell = document.createElement('td');
                 const actionButton = document.createElement('button');
@@ -818,7 +826,7 @@
                 actionButton.addEventListener('click', () => showUserDetails(user));
                 actionsCell.appendChild(actionButton);
                 row.appendChild(actionsCell);
-                
+
                 usersTableBody.appendChild(row);
             });
 
@@ -840,7 +848,7 @@
             } else {
                 currentUserLocation = null;
             }
-            
+
             // After the modal is displayed, always convert coordinates to address if location exists
             setTimeout(() => {
                 const modalFullAddress = document.getElementById('modalFullAddress');
@@ -849,7 +857,7 @@
                     convertCoordinatesToAddress(user.location.latitude, user.location.longitude, modalFullAddress);
                 }
             }, 100);
-            
+
             modalBody.innerHTML = `
                 <div class="user-detail-grid">
                     <div class="detail-group">
@@ -879,9 +887,9 @@
                     <div class="detail-group full-width">
                         <div class="detail-label">Full Address</div>
                         <div class="detail-value" id="modalFullAddress">
-                            ${user.location ? 
-                                `Coordinates: ${user.location.latitude.toFixed(6)}, ${user.location.longitude.toFixed(6)}` : 
-                                'No location data available'}
+                            ${user.location ?
+                    `Coordinates: ${user.location.latitude.toFixed(6)}, ${user.location.longitude.toFixed(6)}` :
+                    'No location data available'}
                         </div>
                     </div>
                     ${user.location ? `
@@ -912,7 +920,7 @@
                 ` : ''}
             `;
             userModal.style.display = 'flex';
-            
+
             // Initialize the map after the modal is displayed
             if (user.location) {
                 setTimeout(() => {
@@ -926,13 +934,13 @@
             const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
             const startRange = (currentPage - 1) * itemsPerPage + 1;
             const endRange = Math.min(startRange + itemsPerPage - 1, filteredUsers.length);
-            
+
             document.getElementById('startRange').textContent = startRange;
             document.getElementById('endRange').textContent = endRange;
             document.getElementById('totalItems').textContent = filteredUsers.length;
-            
+
             paginationControls.innerHTML = '';
-            
+
             // Previous button
             const prevButton = document.createElement('button');
             prevButton.className = 'pagination-btn';
@@ -945,12 +953,12 @@
                 }
             });
             paginationControls.appendChild(prevButton);
-            
+
             // Page buttons
             const maxButtons = 5;
             const startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
             const endPage = Math.min(totalPages, startPage + maxButtons - 1);
-            
+
             for (let i = startPage; i <= endPage; i++) {
                 const pageButton = document.createElement('button');
                 pageButton.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
@@ -961,7 +969,7 @@
                 });
                 paginationControls.appendChild(pageButton);
             }
-            
+
             // Next button
             const nextButton = document.createElement('button');
             nextButton.className = 'pagination-btn';
@@ -974,7 +982,7 @@
                 }
             });
             paginationControls.appendChild(nextButton);
-            
+
             pagination.style.display = totalPages > 1 ? 'flex' : 'none';
         }
 
@@ -1015,11 +1023,11 @@
             // Use the same API key that's already being used for the map
             const apiKey = 'AIzaSyBWz5umc3lrE4xUdfPviXY4monWFqX3edw';
             const geocodingUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`;
-            
+
             // Show loading indicator in the address cell
             const originalText = addressElement.textContent;
             addressElement.textContent = 'Converting coordinates to address...';
-            
+
             fetch(geocodingUrl)
                 .then(response => response.json())
                 .then(data => {
@@ -1027,7 +1035,7 @@
                         // Get the most detailed result (usually the first one)
                         const formattedAddress = data.results[0].formatted_address;
                         addressElement.textContent = formattedAddress;
-                        
+
                         // If we have a user ID, we could update the database with this address
                         // This would require an additional API endpoint on the server
                         if (addressElement.dataset.userId) {
