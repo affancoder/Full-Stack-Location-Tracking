@@ -59,6 +59,121 @@
             color: var(--text-color);
         }
 
+        /* Button Base Styles */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            border: none;
+            border-radius: 0.375rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Button ripple effect */
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            opacity: 0;
+            border-radius: 100%;
+            transform: scale(1, 1) translate(-50%);
+            transform-origin: 50% 50%;
+        }
+
+        .btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        .btn:active::after {
+            animation: ripple 0.6s ease-out;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0, 0);
+                opacity: 0.5;
+            }
+            20% {
+                transform: scale(25, 25);
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(40, 40);
+            }
+        }
+
+        /* Primary Button */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Secondary Button */
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Small Button */
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+
+        /* Icon Button */
+        .btn-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon.btn-sm {
+            width: 2rem;
+            height: 2rem;
+        }
+
+        /* Refresh Button */
         .refresh-btn {
             background-color: var(--primary-color);
             color: white;
@@ -70,11 +185,24 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .refresh-btn:hover {
             background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .refresh-btn:focus {
+            outline: 2px solid var(--primary-hover);
+            outline-offset: 2px;
         }
 
         .stats-container {
@@ -226,11 +354,24 @@
             padding: 0.5rem 0.75rem;
             font-size: 0.875rem;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .pagination-btn:hover {
             background-color: var(--secondary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .pagination-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .pagination-btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
         }
 
         .pagination-btn.active {
@@ -242,6 +383,8 @@
         .pagination-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .loading-container {
@@ -343,6 +486,23 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-light);
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+        
+        .view-details-btn {
+            margin-top: 0.5rem;
+            display: inline-block;
         }
 
         .modal-body {
@@ -457,7 +617,7 @@
     <div class="container">
         <div class="dashboard-header">
             <h1 class="dashboard-title">User Location Dashboard</h1>
-            <button id="refreshBtn" class="refresh-btn">
+            <button id="refreshBtn" class="btn btn-primary refresh-btn">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
                     <path
@@ -763,7 +923,7 @@
 
                 // Add view details button
                 const viewButton = document.createElement('button');
-                viewButton.className = 'view-details-btn';
+                viewButton.className = 'btn btn-secondary btn-sm view-details-btn';
                 viewButton.textContent = 'View Details';
                 viewButton.dataset.userId = user._id;
                 viewButton.addEventListener('click', () => showUserDetails(user));
@@ -821,7 +981,7 @@
                 // Actions column
                 const actionsCell = document.createElement('td');
                 const actionButton = document.createElement('button');
-                actionButton.className = 'pagination-btn';
+                actionButton.className = 'btn btn-primary btn-sm';
                 actionButton.textContent = 'View Details';
                 actionButton.addEventListener('click', () => showUserDetails(user));
                 actionsCell.appendChild(actionButton);
@@ -943,7 +1103,7 @@
 
             // Previous button
             const prevButton = document.createElement('button');
-            prevButton.className = 'pagination-btn';
+            prevButton.className = 'btn btn-secondary pagination-btn';
             prevButton.textContent = 'Previous';
             prevButton.disabled = currentPage === 1;
             prevButton.addEventListener('click', () => {
@@ -961,7 +1121,7 @@
 
             for (let i = startPage; i <= endPage; i++) {
                 const pageButton = document.createElement('button');
-                pageButton.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+                pageButton.className = `btn ${i === currentPage ? 'btn-primary active' : 'btn-secondary'} pagination-btn`;
                 pageButton.textContent = i;
                 pageButton.addEventListener('click', () => {
                     currentPage = i;
@@ -972,7 +1132,7 @@
 
             // Next button
             const nextButton = document.createElement('button');
-            nextButton.className = 'pagination-btn';
+            nextButton.className = 'btn btn-secondary pagination-btn';
             nextButton.textContent = 'Next';
             nextButton.disabled = currentPage === totalPages;
             nextButton.addEventListener('click', () => {
